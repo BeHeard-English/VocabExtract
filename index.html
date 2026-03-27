@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard|Vocab Extract</title>
+    <title>Be Heard | Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
@@ -858,7 +858,12 @@ ${text.slice(0, 6000)}`;
         const raw  = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
         if (!raw) throw new Error('Gemini không trả về kết quả. Hãy thử lại!');
 
-        const clean = raw.replace(/```json|```/g, '').trim();
+        // Strip markdown fences, then extract JSON array as fallback
+        let clean = raw.replace(/```json|```/g, '').trim();
+        if (!clean.startsWith('[')) {
+            const match = clean.match(/\[[\s\S]*\]/);
+            if (match) clean = match[0];
+        }
         let items;
         try { items = JSON.parse(clean); }
         catch { throw new Error('Không đọc được JSON từ Gemini. Hãy thử lại!'); }
