@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard|Vocab Extract</title>
+    <title>Be Heard | Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
     <style>
+        /* CSS giữ nguyên như bản gốc – đã có trong file của bạn */
         :root {
             --primary: #031383;
             --primary-dark: #020c5e;
@@ -51,7 +52,6 @@
             border: 2px solid var(--border);
         }
 
-        /* ── HEADER ── */
         .app-header {
             overflow: hidden;
             border-radius: 26px 26px 0 0;
@@ -103,7 +103,7 @@
             margin-bottom: 8px;
         }
 
-        /* ── GEMINI KEY BOX ── */
+        /* Gemini Key Box */
         .key-box {
             background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
             border: 2px solid #6ee7b7;
@@ -124,7 +124,7 @@
             color: #065f46;
             display: flex; align-items: center; gap: 7px;
         }
-        .key-box-title .gemini-dot {
+        .gemini-dot {
             display: inline-flex; align-items: center; gap: 3px;
         }
         .gemini-dot span {
@@ -178,7 +178,6 @@
             font-weight: 800;
             color: #065f46;
             white-space: nowrap;
-            transition: background 0.15s;
             flex-shrink: 0;
         }
         .key-eye-btn:hover { background: #a7f3d0; }
@@ -208,7 +207,6 @@
         }
         .key-hint a { color: #047857; font-weight: 800; text-decoration: underline; }
 
-        /* ── TEXTAREA ── */
         #text-input {
             width: 100%;
             min-height: 170px;
@@ -243,7 +241,6 @@
         }
         .char-count.warn { color: var(--action); }
 
-        /* ── CEFR LEVEL SELECTOR ── */
         .level-row {
             display: flex; gap: 8px;
             margin-bottom: 18px;
@@ -279,7 +276,6 @@
         .level-btn[data-level="B2"].active { background: #ea580c; border-color: #c2410c; color: #fff; box-shadow: 0 4px 0 #c2410c, 0 6px 16px rgba(234,88,12,0.3); }
         .level-btn[data-level="C1"].active { background: #be123c; border-color: #9f1239; color: #fff; box-shadow: 0 4px 0 #9f1239, 0 6px 16px rgba(190,18,60,0.3); }
 
-        /* ── COUNT SELECTOR ── */
         .count-row { display: flex; gap: 8px; margin-bottom: 22px; }
         .count-btn {
             flex: 1;
@@ -312,7 +308,6 @@
         }
         .count-btn.active small { opacity: 0.85; }
 
-        /* ── BUTTONS ── */
         .btn {
             width: 100%; padding: 15px 20px;
             border: none; border-radius: 14px;
@@ -352,7 +347,6 @@
         .divider::before, .divider::after { content: ''; flex: 1; height: 2px; background: var(--border); border-radius: 2px; }
         .divider span { font-size: 0.78rem; color: var(--text-muted); font-weight: 700; letter-spacing: 2px; }
 
-        /* ── LOADING ── */
         .loading-wrap {
             padding: 60px 28px;
             display: flex; flex-direction: column;
@@ -372,7 +366,6 @@
         .loading-msg { font-size: 1.05rem; font-weight: 800; color: var(--primary); text-align: center; }
         .loading-sub { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-align: center; }
 
-        /* ── WORD BANK ── */
         .word-bank-container {
             position: sticky; top: 0; z-index: 100;
             background: #fff;
@@ -426,14 +419,12 @@
         }
         .draggable-word.used { opacity: 0.2; pointer-events: none; }
 
-        /* ── EXERCISE ── */
         .exercise-inner { padding: 24px 24px 28px; }
         .exercise-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
         .progress-bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
         .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #4f6af5); border-radius: 99px; transition: width 0.4s ease; }
         .progress-label { font-size: 0.82rem; font-weight: 800; color: var(--text-muted); white-space: nowrap; }
 
-        /* ── SENTENCE CARDS ── */
         .sentence-card {
             background: #f8faff;
             padding: 16px 18px 12px;
@@ -485,7 +476,6 @@
         }
         .definition-badge::before { content: '📖'; font-style: normal; font-size: 0.72rem; }
 
-        /* ── DROP ZONES ── */
         .drop-zone {
             display: inline-flex; justify-content: center; align-items: center;
             min-width: 100px; height: 36px;
@@ -504,7 +494,6 @@
         .drop-zone.hovered { background: #fff9e0; border-color: var(--accent-dark); border-style: solid; transform: scale(1.06); }
         .drop-zone:not(:empty) { background: rgba(3,19,131,0.07); border-style: solid; border-color: var(--primary); color: var(--primary); }
 
-        /* ── RESULT ── */
         .res-word-correct { color: var(--success); font-weight: 900; }
         .res-word-wrong   { color: var(--danger); text-decoration: line-through; opacity: 0.65; margin-right: 3px; }
         .res-word-fixed   { color: var(--success); font-weight: 900; border-bottom: 2px solid var(--success); padding-bottom: 1px; }
@@ -536,7 +525,6 @@
         .result-inner { padding: 24px 24px 32px; }
         .result-actions { display: flex; gap: 12px; flex-direction: column; margin-top: 24px; }
 
-        /* ── ERROR BOX ── */
         .error-box {
             background: var(--danger-bg); border: 2px solid #f1aeb5;
             border-radius: 14px; padding: 16px 20px; margin-top: 16px;
@@ -546,7 +534,6 @@
 
         .hidden { display: none !important; }
 
-        /* ── TOAST ── */
         .toast {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
             background: var(--primary); color: #fff;
@@ -580,39 +567,30 @@
         <p class="subtitle">Be Heard · Smart CEFR Vocabulary</p>
     </div>
 
-    <!-- ══ SETUP ══ -->
+    <!-- SETUP VIEW -->
     <div id="setup-view" class="inner">
 
-        <!-- GEMINI KEY BOX -->
         <div class="key-box">
             <div class="key-box-header">
                 <div class="key-box-title">
-                    <div class="gemini-dot">
-                        <span></span><span></span><span></span><span></span>
-                    </div>
+                    <div class="gemini-dot"><span></span><span></span><span></span><span></span></div>
                     Google Gemini API Key
                 </div>
                 <span class="key-saved-badge" id="key-saved-badge">✓ Đã lưu</span>
             </div>
             <div class="key-input-row">
-                <input type="password" id="gemini-key"
-                    placeholder="AIza..."
-                    autocomplete="off" spellcheck="false"
-                    oninput="onKeyInput()">
+                <input type="password" id="gemini-key" placeholder="AIza..." autocomplete="off" spellcheck="false" oninput="onKeyInput()">
                 <button class="key-eye-btn" onclick="toggleKey()">👁 Hiện</button>
                 <button class="key-save-btn" onclick="saveKey()">💾 Lưu</button>
             </div>
             <p class="key-hint">
-                🔗 Lấy key miễn phí (không cần thẻ ngân hàng) tại
-                <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>
-                · Key chỉ lưu trong trình duyệt này
+                🔗 Lấy key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>
+                · Key chỉ lưu trong trình duyệt
             </p>
         </div>
 
         <p class="section-label">📄 Dán đoạn văn bất kỳ</p>
-        <textarea id="text-input"
-            placeholder="Paste any English text here — an article, story, textbook paragraph... Gemini will automatically extract vocabulary at your chosen CEFR level."
-            oninput="updateCharCount()"></textarea>
+        <textarea id="text-input" placeholder="Paste any English text here — an article, story, textbook paragraph... Gemini will automatically extract vocabulary at your chosen CEFR level." oninput="updateCharCount()"></textarea>
         <p class="char-count" id="char-count">0 ký tự</p>
 
         <p class="section-label">🎯 Cấp độ CEFR cần luyện</p>
@@ -633,14 +611,12 @@
         </div>
 
         <div class="btn-row">
-            <button class="btn btn-primary" onclick="analyzeText()">
-                ✨ Trích xuất &amp; Tạo bài tập
-            </button>
+            <button class="btn btn-primary" onclick="analyzeText()">✨ Trích xuất &amp; Tạo bài tập</button>
         </div>
         <div id="error-display"></div>
     </div>
 
-    <!-- ══ LOADING ══ -->
+    <!-- LOADING VIEW -->
     <div id="loading-view" class="hidden">
         <div class="loading-wrap">
             <div class="spinner-ring"></div>
@@ -649,7 +625,7 @@
         </div>
     </div>
 
-    <!-- ══ EXERCISE ══ -->
+    <!-- EXERCISE VIEW -->
     <div id="exercise-view" class="hidden">
         <div class="word-bank-container">
             <div class="bank-header">
@@ -660,9 +636,7 @@
         </div>
         <div class="exercise-inner">
             <div class="exercise-progress">
-                <div class="progress-bar-track">
-                    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
-                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
                 <div class="progress-label" id="progress-label">0 / 0 đã điền</div>
             </div>
             <div id="questions-list"></div>
@@ -675,7 +649,7 @@
         </div>
     </div>
 
-    <!-- ══ RESULT ══ -->
+    <!-- RESULT VIEW -->
     <div id="result-view" class="hidden">
         <div class="result-inner">
             <div id="score-box" class="score-banner"></div>
@@ -692,118 +666,118 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──
-let selectedLevel = 'B1';
-let selectedCount = 10;
-let currentQuestions = [];
-let allAnswers = [];
+    // State
+    let selectedLevel = 'B1';
+    let selectedCount = 10;
+    let currentQuestions = [];
+    let allAnswers = [];
 
-const LEVEL_COLORS = {
-    A1: { bg:'#16a34a', border:'#15803d', light:'#f0fdf4', light2:'#bbf7d0' },
-    A2: { bg:'#0891b2', border:'#0e7490', light:'#ecfeff', light2:'#a5f3fc' },
-    B1: { bg:'#7c3aed', border:'#6d28d9', light:'#f5f3ff', light2:'#ddd6fe' },
-    B2: { bg:'#ea580c', border:'#c2410c', light:'#fff7ed', light2:'#fed7aa' },
-    C1: { bg:'#be123c', border:'#9f1239', light:'#fff1f2', light2:'#fecdd3' },
-};
-
-// ── KEY MANAGEMENT ──
-(function initKey() {
-    const saved = localStorage.getItem('gemini_api_key');
-    if (saved) {
-        document.getElementById('gemini-key').value = saved;
-        document.getElementById('gemini-key').classList.add('has-value');
-        document.getElementById('key-saved-badge').classList.add('visible');
-    }
-})();
-
-function onKeyInput() {
-    const inp = document.getElementById('gemini-key');
-    inp.classList.toggle('has-value', inp.value.length > 0);
-    document.getElementById('key-saved-badge').classList.remove('visible');
-}
-
-function saveKey() {
-    const key = document.getElementById('gemini-key').value.trim();
-    if (!key) { showToast('⚠️ Chưa nhập key!'); return; }
-    if (!key.startsWith('AIza')) { showToast('⚠️ Key Gemini phải bắt đầu bằng AIza...'); return; }
-    localStorage.setItem('gemini_api_key', key);
-    document.getElementById('key-saved-badge').classList.add('visible');
-    showToast('✅ Đã lưu key vào trình duyệt!');
-}
-
-function toggleKey() {
-    const inp = document.getElementById('gemini-key');
-    const btn = document.querySelector('.key-eye-btn');
-    if (inp.type === 'password') { inp.type = 'text';     btn.textContent = '🙈 Ẩn'; }
-    else                          { inp.type = 'password'; btn.textContent = '👁 Hiện'; }
-}
-
-// ── UI HELPERS ──
-function showView(id) {
-    ['setup-view','loading-view','exercise-view','result-view'].forEach(v =>
-        document.getElementById(v).classList.toggle('hidden', v !== id));
-}
-function goSetup() { showView('setup-view'); }
-
-function updateCharCount() {
-    const len = document.getElementById('text-input').value.length;
-    const el  = document.getElementById('char-count');
-    el.textContent = len + ' ký tự';
-    el.className = 'char-count' + (len > 8000 ? ' warn' : '');
-}
-function setLevel(btn, lv) {
-    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedLevel = lv;
-}
-function setCount(btn, n) {
-    document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedCount = n;
-}
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2400);
-}
-
-// ── LOADING CYCLE ──
-const LOADING_STEPS = [
-    ['📖 Đang đọc đoạn văn...', 'Gemini đang phân tích nội dung'],
-    ['🔍 Tìm từ vựng phù hợp...', `Lọc ${selectedCount} từ cấp ${selectedLevel}`],
-    ['🎯 Đối chiếu chuẩn CEFR...', 'Kiểm tra độ khó từng từ'],
-    ['✍️ Đang tạo bài tập...', 'Sắp hoàn tất rồi!'],
-];
-let loadTimer = null;
-function startLoading() {
-    let i = 0;
-    const setMsg = () => {
-        document.getElementById('loading-msg').textContent = LOADING_STEPS[i % LOADING_STEPS.length][0];
-        document.getElementById('loading-sub').textContent = LOADING_STEPS[i % LOADING_STEPS.length][1];
-        i++;
+    const LEVEL_COLORS = {
+        A1: { bg:'#16a34a', border:'#15803d', light:'#f0fdf4', light2:'#bbf7d0' },
+        A2: { bg:'#0891b2', border:'#0e7490', light:'#ecfeff', light2:'#a5f3fc' },
+        B1: { bg:'#7c3aed', border:'#6d28d9', light:'#f5f3ff', light2:'#ddd6fe' },
+        B2: { bg:'#ea580c', border:'#c2410c', light:'#fff7ed', light2:'#fed7aa' },
+        C1: { bg:'#be123c', border:'#9f1239', light:'#fff1f2', light2:'#fecdd3' },
     };
-    setMsg();
-    loadTimer = setInterval(setMsg, 2400);
-}
-function stopLoading() { if (loadTimer) { clearInterval(loadTimer); loadTimer = null; } }
 
-// ── GEMINI API CALL ──
-async function analyzeText() {
-    document.getElementById('error-display').innerHTML = '';
+    // Key management
+    (function initKey() {
+        const saved = localStorage.getItem('gemini_api_key');
+        if (saved) {
+            document.getElementById('gemini-key').value = saved;
+            document.getElementById('gemini-key').classList.add('has-value');
+            document.getElementById('key-saved-badge').classList.add('visible');
+        }
+    })();
 
-    const apiKey = document.getElementById('gemini-key').value.trim();
-    const text   = document.getElementById('text-input').value.trim();
+    function onKeyInput() {
+        const inp = document.getElementById('gemini-key');
+        inp.classList.toggle('has-value', inp.value.length > 0);
+        document.getElementById('key-saved-badge').classList.remove('visible');
+    }
 
-    if (!apiKey)        { showToast('⚠️ Vui lòng nhập Gemini API key!'); return; }
-    if (!apiKey.startsWith('AIza')) { showToast('⚠️ Key không đúng định dạng (phải bắt đầu AIza...)'); return; }
-    if (!text)          { showToast('⚠️ Hãy dán đoạn văn vào trước!'); return; }
-    if (text.length < 80) { showToast('⚠️ Đoạn văn quá ngắn, hãy thử đoạn dài hơn!'); return; }
+    function saveKey() {
+        const key = document.getElementById('gemini-key').value.trim();
+        if (!key) { showToast('⚠️ Chưa nhập key!'); return; }
+        if (!key.startsWith('AIza')) { showToast('⚠️ Key Gemini phải bắt đầu bằng AIza...'); return; }
+        localStorage.setItem('gemini_api_key', key);
+        document.getElementById('key-saved-badge').classList.add('visible');
+        showToast('✅ Đã lưu key vào trình duyệt!');
+    }
 
-    showView('loading-view');
-    startLoading();
+    function toggleKey() {
+        const inp = document.getElementById('gemini-key');
+        const btn = document.querySelector('.key-eye-btn');
+        if (inp.type === 'password') { inp.type = 'text';     btn.textContent = '🙈 Ẩn'; }
+        else                          { inp.type = 'password'; btn.textContent = '👁 Hiện'; }
+    }
 
-    const prompt = `You are a CEFR vocabulary expert. Analyze the text below and extract exactly ${selectedCount} vocabulary words appropriate for ${selectedLevel} learners.
+    // UI helpers
+    function showView(id) {
+        ['setup-view','loading-view','exercise-view','result-view'].forEach(v =>
+            document.getElementById(v).classList.toggle('hidden', v !== id));
+    }
+    function goSetup() { showView('setup-view'); }
+
+    function updateCharCount() {
+        const len = document.getElementById('text-input').value.length;
+        const el  = document.getElementById('char-count');
+        el.textContent = len + ' ký tự';
+        el.className = 'char-count' + (len > 8000 ? ' warn' : '');
+    }
+    function setLevel(btn, lv) {
+        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedLevel = lv;
+    }
+    function setCount(btn, n) {
+        document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedCount = n;
+    }
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    // Loading animation
+    const LOADING_STEPS = [
+        ['📖 Đang đọc đoạn văn...', 'Gemini đang phân tích nội dung'],
+        ['🔍 Tìm từ vựng phù hợp...', `Lọc ${selectedCount} từ cấp ${selectedLevel}`],
+        ['🎯 Đối chiếu chuẩn CEFR...', 'Kiểm tra độ khó từng từ'],
+        ['✍️ Đang tạo bài tập...', 'Sắp hoàn tất rồi!'],
+    ];
+    let loadTimer = null;
+    function startLoading() {
+        let i = 0;
+        const setMsg = () => {
+            document.getElementById('loading-msg').textContent = LOADING_STEPS[i % LOADING_STEPS.length][0];
+            document.getElementById('loading-sub').textContent = LOADING_STEPS[i % LOADING_STEPS.length][1];
+            i++;
+        };
+        setMsg();
+        loadTimer = setInterval(setMsg, 2400);
+    }
+    function stopLoading() { if (loadTimer) { clearInterval(loadTimer); loadTimer = null; } }
+
+    // Gemini API call with robust JSON parsing
+    async function analyzeText() {
+        document.getElementById('error-display').innerHTML = '';
+
+        const apiKey = document.getElementById('gemini-key').value.trim();
+        const text   = document.getElementById('text-input').value.trim();
+
+        if (!apiKey)        { showToast('⚠️ Vui lòng nhập Gemini API key!'); return; }
+        if (!apiKey.startsWith('AIza')) { showToast('⚠️ Key không đúng định dạng (phải bắt đầu AIza...)'); return; }
+        if (!text)          { showToast('⚠️ Hãy dán đoạn văn vào trước!'); return; }
+        if (text.length < 80) { showToast('⚠️ Đoạn văn quá ngắn, hãy thử đoạn dài hơn!'); return; }
+
+        showView('loading-view');
+        startLoading();
+
+        const prompt = `You are a CEFR vocabulary expert. Analyze the text below and extract exactly ${selectedCount} vocabulary words appropriate for ${selectedLevel} learners.
 
 CEFR Level Reference:
 - A1: Very basic everyday words (go, big, house, happy, eat, come, like, good, day, work)
@@ -832,428 +806,448 @@ Return ONLY a valid JSON array — no markdown, no backticks, no explanation:
 Text to analyze:
 ${text.slice(0, 6000)}`;
 
-    try {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
-const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 2048
-        }
-    })
-});
+        try {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.2,
+                        maxOutputTokens: 2048
+                    }
+                })
+            });
 
-        if (!res.ok) {
-            const errBody = await res.json().catch(() => ({}));
-            const msg = errBody?.error?.message || `Lỗi API: ${res.status}`;
-            throw new Error(msg);
-        }
+            if (!response.ok) {
+                const errBody = await response.json().catch(() => ({}));
+                const msg = errBody?.error?.message || `Lỗi API: ${response.status}`;
+                throw new Error(msg);
+            }
 
-        const data = await res.json();
-        const raw  = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (!raw) throw new Error('Gemini không trả về kết quả. Hãy thử lại!');
+            const data = await response.json();
+            let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            if (!raw) throw new Error('Gemini không trả về kết quả. Hãy thử lại!');
 
-        const clean = raw.replace(/```json|```/g, '').trim();
-        let items;
-        try { items = JSON.parse(clean); }
-        catch { throw new Error('Không đọc được JSON từ Gemini. Hãy thử lại!'); }
+            console.log('Raw Gemini response:', raw);
 
-        if (!Array.isArray(items) || items.length === 0)
-            throw new Error('Không tìm thấy từ vựng phù hợp. Hãy thử đoạn văn khác!');
+            // Clean up markdown and try to extract JSON array
+            let cleaned = raw.replace(/```json\s*|\s*```/g, '').trim();
+            // If there is text before/after the array, try to find first JSON array
+            const match = cleaned.match(/\[\s*\{[\s\S]*\}\s*\]/);
+            if (match) cleaned = match[0];
 
-        currentQuestions = items
-            .filter(it => it.word && it.sentence && it.sentence.includes('[BLANK]'))
-            .slice(0, selectedCount)
-            .map(it => ({
-                word:          it.word.trim(),
-                text:          it.sentence.trim(),
-                definition_vi: it.definition_vi || '',
-                gaps:          [it.word.trim()]
-            }));
+            let items;
+            try {
+                items = JSON.parse(cleaned);
+            } catch (e) {
+                console.error('JSON parse error:', e, 'Cleaned string:', cleaned);
+                throw new Error(`Không đọc được JSON từ Gemini. Phản hồi thô (200 ký tự đầu): ${raw.substring(0, 200)}...`);
+            }
 
-        if (currentQuestions.length === 0)
-            throw new Error('Câu trả về không hợp lệ. Hãy thử lại!');
+            if (!Array.isArray(items) || items.length === 0)
+                throw new Error('Không tìm thấy từ vựng phù hợp. Hãy thử đoạn văn khác!');
 
-        allAnswers = currentQuestions.map(q => q.word);
-        stopLoading();
-        renderExercise();
+            currentQuestions = items
+                .filter(it => it.word && it.sentence && it.sentence.includes('[BLANK]'))
+                .slice(0, selectedCount)
+                .map(it => ({
+                    word:          it.word.trim(),
+                    text:          it.sentence.trim(),
+                    definition_vi: it.definition_vi || '',
+                    gaps:          [it.word.trim()]
+                }));
 
-    } catch (err) {
-        stopLoading();
-        showView('setup-view');
-        document.getElementById('error-display').innerHTML = `
-            <div class="error-box">⚠️ <span>${err.message || 'Có lỗi xảy ra, hãy thử lại!'}</span></div>`;
-    }
-}
+            if (currentQuestions.length === 0)
+                throw new Error('Câu trả về không hợp lệ. Hãy thử lại!');
 
-// ── RENDER EXERCISE ──
-function renderExercise() {
-    showView('exercise-view');
+            allAnswers = currentQuestions.map(q => q.word);
+            stopLoading();
+            renderExercise();
 
-    const lc = LEVEL_COLORS[selectedLevel] || LEVEL_COLORS.B1;
-    const badge = document.getElementById('active-level-badge');
-    badge.textContent = selectedLevel;
-    badge.style.cssText = `background:${lc.light}; color:${lc.bg}; border:1.5px solid ${lc.light2};`;
-
-    const bank = document.getElementById('bank-content');
-    const list = document.getElementById('questions-list');
-    bank.innerHTML = ''; list.innerHTML = '';
-
-    // Word bank — shuffled
-    [...allAnswers].sort(() => 0.5 - Math.random()).forEach((w, i) => {
-        const div = document.createElement('div');
-        div.className = 'draggable-word';
-        div.innerText = w;
-        div.draggable = true;
-        div.id = `word-${i}`;
-        div.addEventListener('dragstart', e => { e.dataTransfer.setData('text', e.target.innerText); e.target.classList.add('dragging'); });
-        div.addEventListener('dragend',   e => e.target.classList.remove('dragging'));
-        div.addEventListener('touchstart', onTouchStart, { passive: true });
-        div.addEventListener('touchmove',  onTouchMove,  { passive: false });
-        div.addEventListener('touchend',   onTouchEnd,   { passive: true });
-        div.addEventListener('click', () => handleWordClick(div));
-        bank.appendChild(div);
-    });
-
-    // Sentence cards
-    currentQuestions.forEach((q, qi) => {
-        const card = document.createElement('div');
-        card.className = 'sentence-card';
-        const sentHtml = q.text.replace('[BLANK]',
-            `<span class="drop-zone" data-q="${qi}" data-g="0"
-                ondrop="handleDrop(event)"
-                ondragover="event.preventDefault();this.classList.add('hovered')"
-                ondragleave="this.classList.remove('hovered')"
-                onclick="handleZoneClick(this)"></span>`);
-        card.innerHTML = `
-            <div class="q-number">${qi + 1}</div>
-            <div style="flex:1">
-                <div>${sentHtml}</div>
-                ${q.definition_vi ? `<div class="definition-badge">${q.definition_vi}</div>` : ''}
-            </div>`;
-        list.appendChild(card);
-    });
-
-    updateProgress();
-    window.scrollTo(0, 0);
-}
-
-// ── PROGRESS ──
-function updateProgress() {
-    const zones  = document.querySelectorAll('.drop-zone');
-    const filled = [...zones].filter(z => z.innerText.trim()).length;
-    const pct    = zones.length ? Math.round((filled / zones.length) * 100) : 0;
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('progress-label').textContent = `${filled} / ${zones.length} đã điền`;
-}
-
-// ── TAP-TO-FILL ──
-let selectedWordEl = null;
-function handleWordClick(el) {
-    if (el.classList.contains('used')) return;
-    if (selectedWordEl) selectedWordEl.style.background = '';
-    if (selectedWordEl === el) { selectedWordEl = null; return; }
-    selectedWordEl = el;
-    el.style.background = 'var(--accent)';
-    showToast('👆 Nhấn vào ô trống để điền');
-}
-function handleZoneClick(zone) {
-    if (selectedWordEl) {
-        if (zone.innerText) toggleBank(zone.innerText, false);
-        zone.innerText = selectedWordEl.innerText;
-        toggleBank(selectedWordEl.innerText, true);
-        selectedWordEl.style.background = '';
-        selectedWordEl = null;
-    } else if (zone.innerText) {
-        toggleBank(zone.innerText, false);
-        zone.innerText = '';
-    }
-    updateProgress();
-}
-
-// ── DRAG & DROP ──
-function handleDrop(e) {
-    e.preventDefault();
-    e.target.classList.remove('hovered');
-    const word = e.dataTransfer.getData('text');
-    if (e.target.innerText) toggleBank(e.target.innerText, false);
-    e.target.innerText = word;
-    toggleBank(word, true);
-    updateProgress();
-}
-function toggleBank(word, used) {
-    for (const it of document.querySelectorAll('.draggable-word')) {
-        if (it.innerText === word && it.classList.contains('used') === !used) {
-            used ? it.classList.add('used') : it.classList.remove('used');
-            break;
+        } catch (err) {
+            stopLoading();
+            showView('setup-view');
+            document.getElementById('error-display').innerHTML = `
+                <div class="error-box">⚠️ <span>${err.message || 'Có lỗi xảy ra, hãy thử lại!'}</span></div>`;
         }
     }
-}
 
-// ── SUBMIT ──
-function submitExercise() {
-    let correct = 0, total = 0;
-    const resDiv = document.getElementById('detailed-results');
-    resDiv.innerHTML = '';
+    // ── RENDER EXERCISE ──
+    function renderExercise() {
+        showView('exercise-view');
 
-    currentQuestions.forEach((q, qi) => {
-        total++;
-        const zone    = document.querySelector(`[data-q="${qi}"][data-g="0"]`);
-        const userAns = zone ? zone.innerText.trim() : '';
-        const ok      = userAns.toLowerCase() === q.word.toLowerCase();
-        if (ok) correct++;
+        const lc = LEVEL_COLORS[selectedLevel] || LEVEL_COLORS.B1;
+        const badge = document.getElementById('active-level-badge');
+        badge.textContent = selectedLevel;
+        badge.style.cssText = `background:${lc.light}; color:${lc.bg}; border:1.5px solid ${lc.light2};`;
 
-        const feedback = ok
-            ? `<span class="res-word-correct">${userAns}</span>`
-            : `<span class="res-word-wrong">${userAns || '...'}</span><span class="res-word-fixed">${q.word}</span>`;
+        const bank = document.getElementById('bank-content');
+        const list = document.getElementById('questions-list');
+        bank.innerHTML = ''; list.innerHTML = '';
 
-        const card = document.createElement('div');
-        card.className = `sentence-card ${ok ? 'correct' : 'wrong'}`;
-        card.innerHTML = `
-            <div class="q-number">${qi + 1}</div>
-            <div style="flex:1">
-                <div>${q.text.replace('[BLANK]', feedback)}</div>
-                ${q.definition_vi ? `<div class="definition-badge">${q.definition_vi}</div>` : ''}
-            </div>`;
-        resDiv.appendChild(card);
-    });
+        // Word bank — shuffled
+        [...allAnswers].sort(() => 0.5 - Math.random()).forEach((w, i) => {
+            const div = document.createElement('div');
+            div.className = 'draggable-word';
+            div.innerText = w;
+            div.draggable = true;
+            div.id = `word-${i}`;
+            div.addEventListener('dragstart', e => { e.dataTransfer.setData('text', e.target.innerText); e.target.classList.add('dragging'); });
+            div.addEventListener('dragend',   e => e.target.classList.remove('dragging'));
+            div.addEventListener('touchstart', onTouchStart, { passive: true });
+            div.addEventListener('touchmove',  onTouchMove,  { passive: false });
+            div.addEventListener('touchend',   onTouchEnd,   { passive: true });
+            div.addEventListener('click', () => handleWordClick(div));
+            bank.appendChild(div);
+        });
 
-    const pct = Math.round((correct / total) * 100);
-    let icon = '🔥', msg = 'Cố lên, bạn sẽ làm được!';
-    if (pct === 100)    { icon = '🏆'; msg = 'TUYỆT VỜI! Bạn nắm hết tất cả rồi!'; }
-    else if (pct >= 80) { icon = '🌟'; msg = 'XUẤT SẮC! Gần hoàn hảo rồi!'; }
-    else if (pct >= 50) { icon = '👍'; msg = 'KHÁ! Tiếp tục luyện tập nhé!'; }
+        // Sentence cards
+        currentQuestions.forEach((q, qi) => {
+            const card = document.createElement('div');
+            card.className = 'sentence-card';
+            const sentHtml = q.text.replace('[BLANK]',
+                `<span class="drop-zone" data-q="${qi}" data-g="0"
+                    ondrop="handleDrop(event)"
+                    ondragover="event.preventDefault();this.classList.add('hovered')"
+                    ondragleave="this.classList.remove('hovered')"
+                    onclick="handleZoneClick(this)"></span>`);
+            card.innerHTML = `
+                <div class="q-number">${qi + 1}</div>
+                <div style="flex:1">
+                    <div>${sentHtml}</div>
+                    ${q.definition_vi ? `<div class="definition-badge">${q.definition_vi}</div>` : ''}
+                </div>`;
+            list.appendChild(card);
+        });
 
-    document.getElementById('score-box').innerHTML = `
-        <div class="score-circle">
-            <div class="score-pct">${pct}%</div>
-            <div class="score-label">điểm số</div>
-        </div>
-        <div class="score-count">✅ ${correct} đúng / ${total} câu</div>
-        <div class="score-msg">${icon} ${msg}</div>
-        <div class="score-meta">Cấp ${selectedLevel} · Powered by Gemini 1.5 Flash</div>`;
-
-    showView('result-view');
-    window.scrollTo(0, 0);
-}
-
-function doItAgain() {
-    document.getElementById('detailed-results').innerHTML = '';
-    renderExercise();
-}
-
-// ══════════════════════════════════════
-// TOUCH DRAG — mobile / tablet
-// ══════════════════════════════════════
-let touchWord = null, touchClone = null;
-
-function onTouchStart(e) {
-    const el = e.currentTarget;
-    if (el.classList.contains('used')) return;
-    touchWord = el;
-    touchClone = el.cloneNode(true);
-    touchClone.style.cssText = `
-        position:fixed; z-index:9999; pointer-events:none;
-        opacity:0.93; transform:scale(1.13) rotate(-2deg); transition:none; margin:0;
-        background:#FFD93D; border:2.5px solid #031383;
-        padding:4px 14px; border-radius:99px;
-        font-family:Nunito,sans-serif; font-weight:800; font-size:0.85rem; color:#031383;
-        box-shadow:0 8px 22px rgba(0,0,0,0.22); white-space:nowrap;`;
-    document.body.appendChild(touchClone);
-    moveClone(e.touches[0]);
-    el.classList.add('used');
-}
-function onTouchMove(e) {
-    if (!touchClone) return;
-    e.preventDefault();
-    moveClone(e.touches[0]);
-    document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('hovered'));
-    const z = nearestZone(e.touches[0]);
-    if (z) z.classList.add('hovered');
-}
-function onTouchEnd(e) {
-    if (!touchClone) return;
-    const zone = nearestZone(e.changedTouches[0]);
-    touchClone.remove(); touchClone = null;
-    document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('hovered'));
-    if (zone) {
-        if (zone.innerText.trim()) toggleBank(zone.innerText.trim(), false);
-        zone.innerText = touchWord.innerText;
-        toggleBank(touchWord.innerText, true);
         updateProgress();
-    } else {
-        touchWord.classList.remove('used');
-    }
-    touchWord = null;
-}
-function moveClone(t) {
-    if (!touchClone) return;
-    touchClone.style.left = (t.clientX - (touchClone.offsetWidth || 60) / 2) + 'px';
-    touchClone.style.top  = (t.clientY - (touchClone.offsetHeight || 28) / 2 - 24) + 'px';
-}
-// Proximity detection — 28px padding around each zone
-function nearestZone(touch) {
-    const x = touch.clientX, y = touch.clientY, P = 28;
-    let best = null, bestD = Infinity;
-    document.querySelectorAll('.drop-zone').forEach(z => {
-        const r = z.getBoundingClientRect();
-        if (x < r.left-P || x > r.right+P || y < r.top-P || y > r.bottom+P) return;
-        const d = Math.hypot(x-(r.left+r.right)/2, y-(r.top+r.bottom)/2);
-        if (d < bestD) { bestD = d; best = z; }
-    });
-    return best;
-}
-
-// ══════════════════════════════════════
-// PDF EXPORT
-// ══════════════════════════════════════
-function downloadPDF() {
-    if (!currentQuestions.length) { showToast('⚠️ Chưa có bài tập!'); return; }
-    if (typeof window.jspdf === 'undefined') { showToast('⏳ Thư viện PDF đang tải, thử lại sau!'); return; }
-    showToast('📥 Đang tạo PDF...');
-
-    const { jsPDF } = window.jspdf;
-    const doc   = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-    const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
-    const M = 18, cW = pageW - M * 2;
-    const PRIMARY = [3,19,131], ACCENT = [255,217,61], BORDER = [218,225,245], SUCCESS = [39,174,96];
-    const lc = LEVEL_COLORS[selectedLevel] || LEVEL_COLORS.B1;
-
-    function hexToRgb(hex) {
-        const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-        return [r,g,b];
-    }
-    const LEVEL_RGB = hexToRgb(lc.bg);
-
-    function footer(cur, total) {
-        doc.setFontSize(8); doc.setTextColor(150,150,160); doc.setFont('helvetica','normal');
-        doc.text(`Be Heard · Vocab Extract · Level ${selectedLevel} · Gemini`, M, pageH-8);
-        doc.text(`Trang ${cur}/${total}`, pageW-M, pageH-8, { align:'right' });
-        doc.setDrawColor(...BORDER); doc.setLineWidth(0.3);
-        doc.line(M, pageH-12, pageW-M, pageH-12);
+        window.scrollTo(0, 0);
     }
 
-    // HEADER
-    doc.setFillColor(...PRIMARY); doc.rect(0,0,pageW,38,'F');
-    doc.setFillColor(...ACCENT);  doc.rect(0,38,pageW,4,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(22);
-    doc.text('Fill in the Gaps', pageW/2, 14, { align:'center' });
-    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(200,210,255);
-    doc.text('Vocab Extract  ·  Be Heard  ·  Powered by Gemini', pageW/2, 23, { align:'center' });
-    doc.setFillColor(...LEVEL_RGB);
-    doc.roundedRect(pageW/2-18,27,36,8,3,3,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9);
-    doc.text(`Level ${selectedLevel}`, pageW/2, 32.5, { align:'center' });
-    const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
-    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(200,210,255);
-    doc.text(today, pageW/2, 37, { align:'center' });
+    function updateProgress() {
+        const zones  = document.querySelectorAll('.drop-zone');
+        const filled = [...zones].filter(z => z.innerText.trim()).length;
+        const pct    = zones.length ? Math.round((filled / zones.length) * 100) : 0;
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('progress-label').textContent = `${filled} / ${zones.length} đã điền`;
+    }
 
-    let y = 52;
+    // Tap‑to‑fill
+    let selectedWordEl = null;
+    function handleWordClick(el) {
+        if (el.classList.contains('used')) return;
+        if (selectedWordEl) selectedWordEl.style.background = '';
+        if (selectedWordEl === el) { selectedWordEl = null; return; }
+        selectedWordEl = el;
+        el.style.background = 'var(--accent)';
+        showToast('👆 Nhấn vào ô trống để điền');
+    }
+    function handleZoneClick(zone) {
+        if (selectedWordEl) {
+            if (zone.innerText) toggleBank(zone.innerText, false);
+            zone.innerText = selectedWordEl.innerText;
+            toggleBank(selectedWordEl.innerText, true);
+            selectedWordEl.style.background = '';
+            selectedWordEl = null;
+        } else if (zone.innerText) {
+            toggleBank(zone.innerText, false);
+            zone.innerText = '';
+        }
+        updateProgress();
+    }
 
-    // STUDENT INFO
-    doc.setFillColor(238,242,255); doc.roundedRect(M,y,cW,16,3,3,'F');
-    doc.setDrawColor(...BORDER); doc.setLineWidth(0.5); doc.roundedRect(M,y,cW,16,3,3,'S');
-    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...PRIMARY);
-    doc.text('Name:', M+5, y+7);
-    doc.setDrawColor(160,170,210); doc.setLineWidth(0.4);
-    doc.line(M+19, y+7.5, M+90, y+7.5);
-    doc.text('Class:', M+100, y+7);
-    doc.line(M+114, y+7.5, cW+M-30, y+7.5);
-    doc.text('Score:', cW+M-25, y+7);
-    doc.line(cW+M-10, y+7.5, cW+M, y+7.5);
-    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(130,140,170);
-    doc.text('      Instructions: Use the words from the Word Bank to fill in the blanks.', M, y+13.5);
-    y += 24;
+    // Drag & drop
+    function handleDrop(e) {
+        e.preventDefault();
+        e.target.classList.remove('hovered');
+        const word = e.dataTransfer.getData('text');
+        if (e.target.innerText) toggleBank(e.target.innerText, false);
+        e.target.innerText = word;
+        toggleBank(word, true);
+        updateProgress();
+    }
+    function toggleBank(word, used) {
+        for (const it of document.querySelectorAll('.draggable-word')) {
+            if (it.innerText === word && it.classList.contains('used') === !used) {
+                used ? it.classList.add('used') : it.classList.remove('used');
+                break;
+            }
+        }
+    }
 
-    // WORD BANK
-    const bWords = [...new Set(allAnswers)].sort();
-    const bCols=4, bCellW=cW/bCols, bRows=Math.ceil(bWords.length/bCols);
-    doc.setFillColor(...PRIMARY); doc.roundedRect(M,y,cW,10,2,2,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
-    doc.text('WORD BANK', M+5, y+7);
-    y+=10;
-    const bankBodyH = bRows*8+6;
-    doc.setFillColor(248,250,255); doc.roundedRect(M,y,cW,bankBodyH,2,2,'F');
-    doc.setDrawColor(...BORDER); doc.setLineWidth(0.5); doc.roundedRect(M,y,cW,bankBodyH,2,2,'S');
-    y+=6;
-    bWords.forEach((w,i) => {
-        const col=i%bCols, row=Math.floor(i/bCols);
-        const cx=M+col*bCellW+5, cy=y+row*8, chipW=bCellW-8;
-        doc.setFillColor(255,255,255); doc.setDrawColor(...BORDER); doc.setLineWidth(0.4);
-        doc.roundedRect(cx-2,cy-5,chipW,7,1.5,1.5,'FD');
+    // Submit exercise
+    function submitExercise() {
+        let correct = 0, total = 0;
+        const resDiv = document.getElementById('detailed-results');
+        resDiv.innerHTML = '';
+
+        currentQuestions.forEach((q, qi) => {
+            total++;
+            const zone    = document.querySelector(`[data-q="${qi}"][data-g="0"]`);
+            const userAns = zone ? zone.innerText.trim() : '';
+            const ok      = userAns.toLowerCase() === q.word.toLowerCase();
+            if (ok) correct++;
+
+            const feedback = ok
+                ? `<span class="res-word-correct">${userAns}</span>`
+                : `<span class="res-word-wrong">${userAns || '...'}</span><span class="res-word-fixed">${q.word}</span>`;
+
+            const card = document.createElement('div');
+            card.className = `sentence-card ${ok ? 'correct' : 'wrong'}`;
+            card.innerHTML = `
+                <div class="q-number">${qi + 1}</div>
+                <div style="flex:1">
+                    <div>${q.text.replace('[BLANK]', feedback)}</div>
+                    ${q.definition_vi ? `<div class="definition-badge">${q.definition_vi}</div>` : ''}
+                </div>`;
+            resDiv.appendChild(card);
+        });
+
+        const pct = Math.round((correct / total) * 100);
+        let icon = '🔥', msg = 'Cố lên, bạn sẽ làm được!';
+        if (pct === 100)    { icon = '🏆'; msg = 'TUYỆT VỜI! Bạn nắm hết tất cả rồi!'; }
+        else if (pct >= 80) { icon = '🌟'; msg = 'XUẤT SẮC! Gần hoàn hảo rồi!'; }
+        else if (pct >= 50) { icon = '👍'; msg = 'KHÁ! Tiếp tục luyện tập nhé!'; }
+
+        document.getElementById('score-box').innerHTML = `
+            <div class="score-circle">
+                <div class="score-pct">${pct}%</div>
+                <div class="score-label">điểm số</div>
+            </div>
+            <div class="score-count">✅ ${correct} đúng / ${total} câu</div>
+            <div class="score-msg">${icon} ${msg}</div>
+            <div class="score-meta">Cấp ${selectedLevel} · Powered by Gemini</div>`;
+
+        showView('result-view');
+        window.scrollTo(0, 0);
+    }
+
+    function doItAgain() {
+        document.getElementById('detailed-results').innerHTML = '';
+        renderExercise();
+    }
+
+    // ── TOUCH DRAG (mobile/tablet) ──
+    let touchWord = null, touchClone = null;
+
+    function onTouchStart(e) {
+        const el = e.currentTarget;
+        if (el.classList.contains('used')) return;
+        touchWord = el;
+        touchClone = el.cloneNode(true);
+        touchClone.style.cssText = `
+            position:fixed; z-index:9999; pointer-events:none;
+            opacity:0.93; transform:scale(1.13) rotate(-2deg); transition:none; margin:0;
+            background:#FFD93D; border:2.5px solid #031383;
+            padding:4px 14px; border-radius:99px;
+            font-family:Nunito,sans-serif; font-weight:800; font-size:0.85rem; color:#031383;
+            box-shadow:0 8px 22px rgba(0,0,0,0.22); white-space:nowrap;`;
+        document.body.appendChild(touchClone);
+        moveClone(e.touches[0]);
+        el.classList.add('used');
+    }
+    function onTouchMove(e) {
+        if (!touchClone) return;
+        e.preventDefault();
+        moveClone(e.touches[0]);
+        document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('hovered'));
+        const z = nearestZone(e.touches[0]);
+        if (z) z.classList.add('hovered');
+    }
+    function onTouchEnd(e) {
+        if (!touchClone) return;
+        const zone = nearestZone(e.changedTouches[0]);
+        touchClone.remove(); touchClone = null;
+        document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('hovered'));
+        if (zone) {
+            if (zone.innerText.trim()) toggleBank(zone.innerText.trim(), false);
+            zone.innerText = touchWord.innerText;
+            toggleBank(touchWord.innerText, true);
+            updateProgress();
+        } else {
+            touchWord.classList.remove('used');
+        }
+        touchWord = null;
+    }
+    function moveClone(t) {
+        if (!touchClone) return;
+        touchClone.style.left = (t.clientX - (touchClone.offsetWidth || 60) / 2) + 'px';
+        touchClone.style.top  = (t.clientY - (touchClone.offsetHeight || 28) / 2 - 24) + 'px';
+    }
+    function nearestZone(touch) {
+        const x = touch.clientX, y = touch.clientY, P = 28;
+        let best = null, bestD = Infinity;
+        document.querySelectorAll('.drop-zone').forEach(z => {
+            const r = z.getBoundingClientRect();
+            if (x < r.left-P || x > r.right+P || y < r.top-P || y > r.bottom+P) return;
+            const d = Math.hypot(x-(r.left+r.right)/2, y-(r.top+r.bottom)/2);
+            if (d < bestD) { bestD = d; best = z; }
+        });
+        return best;
+    }
+
+    // ── PDF EXPORT (giữ nguyên từ bản gốc, chỉ thay tên model trong footer) ──
+    function downloadPDF() {
+        if (!currentQuestions.length) { showToast('⚠️ Chưa có bài tập!'); return; }
+        if (typeof window.jspdf === 'undefined') { showToast('⏳ Thư viện PDF đang tải, thử lại sau!'); return; }
+        showToast('📥 Đang tạo PDF...');
+
+        const { jsPDF } = window.jspdf;
+        const doc   = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const M = 18, cW = pageW - M * 2;
+        const PRIMARY = [3,19,131], ACCENT = [255,217,61], BORDER = [218,225,245], SUCCESS = [39,174,96];
+        const lc = LEVEL_COLORS[selectedLevel] || LEVEL_COLORS.B1;
+
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+            return [r,g,b];
+        }
+        const LEVEL_RGB = hexToRgb(lc.bg);
+
+        function footer(cur, total) {
+            doc.setFontSize(8); doc.setTextColor(150,150,160); doc.setFont('helvetica','normal');
+            doc.text(`Be Heard · Vocab Extract · Level ${selectedLevel} · Gemini`, M, pageH-8);
+            doc.text(`Trang ${cur}/${total}`, pageW-M, pageH-8, { align:'right' });
+            doc.setDrawColor(...BORDER); doc.setLineWidth(0.3);
+            doc.line(M, pageH-12, pageW-M, pageH-12);
+        }
+
+        // HEADER
+        doc.setFillColor(...PRIMARY); doc.rect(0,0,pageW,38,'F');
+        doc.setFillColor(...ACCENT);  doc.rect(0,38,pageW,4,'F');
+        doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(22);
+        doc.text('Fill in the Gaps', pageW/2, 14, { align:'center' });
+        doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(200,210,255);
+        doc.text('Vocab Extract  ·  Be Heard  ·  Powered by Gemini', pageW/2, 23, { align:'center' });
+        doc.setFillColor(...LEVEL_RGB);
+        doc.roundedRect(pageW/2-18,27,36,8,3,3,'F');
+        doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+        doc.text(`Level ${selectedLevel}`, pageW/2, 32.5, { align:'center' });
+        const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(200,210,255);
+        doc.text(today, pageW/2, 37, { align:'center' });
+
+        let y = 52;
+
+        // STUDENT INFO
+        doc.setFillColor(238,242,255); doc.roundedRect(M,y,cW,16,3,3,'F');
+        doc.setDrawColor(...BORDER); doc.setLineWidth(0.5); doc.roundedRect(M,y,cW,16,3,3,'S');
         doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...PRIMARY);
-        doc.text(w, cx+chipW/2-2, cy, { align:'center' });
-    });
-    y += bRows*8+4;
+        doc.text('Name:', M+5, y+7);
+        doc.setDrawColor(160,170,210); doc.setLineWidth(0.4);
+        doc.line(M+19, y+7.5, M+90, y+7.5);
+        doc.text('Class:', M+100, y+7);
+        doc.line(M+114, y+7.5, cW+M-30, y+7.5);
+        doc.text('Score:', cW+M-25, y+7);
+        doc.line(cW+M-10, y+7.5, cW+M, y+7.5);
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(130,140,170);
+        doc.text('      Instructions: Use the words from the Word Bank to fill in the blanks.', M, y+13.5);
+        y += 24;
 
-    // QUESTIONS
-    y += 6;
-    doc.setFillColor(...PRIMARY); doc.roundedRect(M,y,cW,10,2,2,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
-    doc.text('FILL IN THE BLANKS', M+5, y+7);
-    y += 14;
+        // WORD BANK
+        const bWords = [...new Set(allAnswers)].sort();
+        const bCols=4, bCellW=cW/bCols, bRows=Math.ceil(bWords.length/bCols);
+        doc.setFillColor(...PRIMARY); doc.roundedRect(M,y,cW,10,2,2,'F');
+        doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+        doc.text('WORD BANK', M+5, y+7);
+        y+=10;
+        const bankBodyH = bRows*8+6;
+        doc.setFillColor(248,250,255); doc.roundedRect(M,y,cW,bankBodyH,2,2,'F');
+        doc.setDrawColor(...BORDER); doc.setLineWidth(0.5); doc.roundedRect(M,y,cW,bankBodyH,2,2,'S');
+        y+=6;
+        bWords.forEach((w,i) => {
+            const col=i%bCols, row=Math.floor(i/bCols);
+            const cx=M+col*bCellW+5, cy=y+row*8, chipW=bCellW-8;
+            doc.setFillColor(255,255,255); doc.setDrawColor(...BORDER); doc.setLineWidth(0.4);
+            doc.roundedRect(cx-2,cy-5,chipW,7,1.5,1.5,'FD');
+            doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...PRIMARY);
+            doc.text(w, cx+chipW/2-2, cy, { align:'center' });
+        });
+        y += bRows*8+4;
 
-    let pg = 1;
-    currentQuestions.forEach((q, idx) => {
-        const blanked = q.text.replace('[BLANK]', '  ____________  ');
-        const defLine = q.definition_vi ? `(${q.definition_vi})` : '';
-        doc.setFontSize(11);
-        const lines = doc.splitTextToSize(blanked, cW-16);
-        const lineH = 6.5;
-        const boxH  = Math.max(lines.length*lineH + (defLine ? 14 : 6), 16);
+        // QUESTIONS
+        y += 6;
+        doc.setFillColor(...PRIMARY); doc.roundedRect(M,y,cW,10,2,2,'F');
+        doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+        doc.text('FILL IN THE BLANKS', M+5, y+7);
+        y += 14;
 
-        if (y+boxH > pageH-20) { footer(pg,2); doc.addPage(); pg++; y=20; }
+        let pg = 1;
+        currentQuestions.forEach((q, idx) => {
+            const blanked = q.text.replace('[BLANK]', '  ____________  ');
+            const defLine = q.definition_vi ? `(${q.definition_vi})` : '';
+            doc.setFontSize(11);
+            const lines = doc.splitTextToSize(blanked, cW-16);
+            const lineH = 6.5;
+            const boxH  = Math.max(lines.length*lineH + (defLine ? 14 : 6), 16);
 
-        if (idx%2===0) { doc.setFillColor(248,250,255); doc.roundedRect(M,y-1,cW,boxH,2,2,'F'); }
+            if (y+boxH > pageH-20) { footer(pg,2); doc.addPage(); pg++; y=20; }
 
-        doc.setFillColor(...ACCENT); doc.roundedRect(M,y+1,8,8,1.5,1.5,'F');
-        doc.setTextColor(...PRIMARY); doc.setFont('helvetica','bold'); doc.setFontSize(8);
-        doc.text(String(idx+1), M+4, y+6.5, { align:'center' });
+            if (idx%2===0) { doc.setFillColor(248,250,255); doc.roundedRect(M,y-1,cW,boxH,2,2,'F'); }
 
-        doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(30,30,50);
-        lines.forEach((ln,li) => doc.text(ln, M+12, y+6.5+li*lineH));
+            doc.setFillColor(...ACCENT); doc.roundedRect(M,y+1,8,8,1.5,1.5,'F');
+            doc.setTextColor(...PRIMARY); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+            doc.text(String(idx+1), M+4, y+6.5, { align:'center' });
 
-        if (defLine) {
-            doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(100,130,180);
-            doc.text(defLine, M+12, y+6.5+lines.length*lineH+1.5);
-        }
-        doc.setDrawColor(...BORDER); doc.setLineWidth(0.25);
-        doc.line(M, y+boxH+1, M+cW, y+boxH+1);
-        y += boxH+4;
-    });
+            doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(30,30,50);
+            lines.forEach((ln,li) => doc.text(ln, M+12, y+6.5+li*lineH));
 
-    // ANSWER KEY
-    footer(pg, pg+1); doc.addPage(); pg++;
-    doc.setFillColor(...PRIMARY); doc.rect(0,0,pageW,28,'F');
-    doc.setFillColor(...LEVEL_RGB); doc.rect(0,28,pageW,3,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18);
-    doc.text('Answer Key', pageW/2, 12, { align:'center' });
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(200,210,255);
-    doc.text('For Teacher Use Only', pageW/2, 22, { align:'center' });
-    y = 40;
-    const aC=2, aCW=cW/aC;
-    currentQuestions.forEach((q,idx) => {
-        const col=idx%aC, row=Math.floor(idx/aC);
-        const ax=M+col*aCW, ay=y+row*12;
-        if (ay+12 > pageH-20) return;
-        doc.setFillColor(...ACCENT); doc.roundedRect(ax,ay-1,7,7,1.5,1.5,'F');
-        doc.setTextColor(...PRIMARY); doc.setFont('helvetica','bold'); doc.setFontSize(8);
-        doc.text(String(idx+1), ax+3.5, ay+4.5, { align:'center' });
-        doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...SUCCESS);
-        doc.text(q.word, ax+10, ay+5);
-        if (q.definition_vi) {
-            doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(130,140,180);
-            doc.text(q.definition_vi, ax+10, ay+10);
-        }
-    });
-    footer(pg, pg);
-    doc.save(`vocab-extract-${selectedLevel}.pdf`);
-    showToast('✅ PDF đã tải xuống!');
-}
+            if (defLine) {
+                doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(100,130,180);
+                doc.text(defLine, M+12, y+6.5+lines.length*lineH+1.5);
+            }
+            doc.setDrawColor(...BORDER); doc.setLineWidth(0.25);
+            doc.line(M, y+boxH+1, M+cW, y+boxH+1);
+            y += boxH+4;
+        });
+
+        // ANSWER KEY
+        footer(pg, pg+1); doc.addPage(); pg++;
+        doc.setFillColor(...PRIMARY); doc.rect(0,0,pageW,28,'F');
+        doc.setFillColor(...LEVEL_RGB); doc.rect(0,28,pageW,3,'F');
+        doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18);
+        doc.text('Answer Key', pageW/2, 12, { align:'center' });
+        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(200,210,255);
+        doc.text('For Teacher Use Only', pageW/2, 22, { align:'center' });
+        y = 40;
+        const aC=2, aCW=cW/aC;
+        currentQuestions.forEach((q,idx) => {
+            const col=idx%aC, row=Math.floor(idx/aC);
+            const ax=M+col*aCW, ay=y+row*12;
+            if (ay+12 > pageH-20) return;
+            doc.setFillColor(...ACCENT); doc.roundedRect(ax,ay-1,7,7,1.5,1.5,'F');
+            doc.setTextColor(...PRIMARY); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+            doc.text(String(idx+1), ax+3.5, ay+4.5, { align:'center' });
+            doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...SUCCESS);
+            doc.text(q.word, ax+10, ay+5);
+            if (q.definition_vi) {
+                doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(130,140,180);
+                doc.text(q.definition_vi, ax+10, ay+10);
+            }
+        });
+        footer(pg, pg);
+        doc.save(`vocab-extract-${selectedLevel}.pdf`);
+        showToast('✅ PDF đã tải xuống!');
+    }
+
+    // Make global functions available
+    window.analyzeText = analyzeText;
+    window.downloadPDF = downloadPDF;
+    window.submitExercise = submitExercise;
+    window.doItAgain = doItAgain;
+    window.goSetup = goSetup;
+    window.setLevel = setLevel;
+    window.setCount = setCount;
+    window.updateCharCount = updateCharCount;
+    window.saveKey = saveKey;
+    window.toggleKey = toggleKey;
+    window.onKeyInput = onKeyInput;
+    window.handleDrop = handleDrop;
+    window.handleZoneClick = handleZoneClick;
 </script>
 </body>
 </html>
