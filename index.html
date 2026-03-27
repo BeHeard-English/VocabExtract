@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard | Vocab Extract</title>
+    <title>Be Heard|Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
@@ -842,8 +842,7 @@ ${text.slice(0, 6000)}`;
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
                     temperature: 0.2,
-                    maxOutputTokens: 2048,
-                    responseMimeType: 'application/json'
+                    maxOutputTokens: 2048
                 }
             })
         });
@@ -855,18 +854,28 @@ ${text.slice(0, 6000)}`;
         }
 
         const data = await res.json();
-        const raw  = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (!raw) throw new Error('Gemini không trả về kết quả. Hãy thử lại!');
+        console.log('Gemini raw response:', JSON.stringify(data));
 
-        // Strip markdown fences, then extract JSON array as fallback
-        let clean = raw.replace(/```json|```/g, '').trim();
+        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (!raw) {
+            const reason = data?.candidates?.[0]?.finishReason || 'unknown';
+            throw new Error(`Gemini không trả về nội dung (finishReason: ${reason}). Hãy thử lại!`);
+        }
+
+        console.log('Raw text from Gemini:', raw);
+
+        // Robust JSON extraction: strip fences, then find [...] array
+        let clean = raw.replace(/```json\s*/gi, '').replace(/```/g, '').trim();
         if (!clean.startsWith('[')) {
             const match = clean.match(/\[[\s\S]*\]/);
             if (match) clean = match[0];
         }
         let items;
         try { items = JSON.parse(clean); }
-        catch { throw new Error('Không đọc được JSON từ Gemini. Hãy thử lại!'); }
+        catch (parseErr) {
+            console.error('JSON parse failed. clean string was:', clean);
+            throw new Error('Gemini trả về dữ liệu không đúng định dạng. Hãy thử lại!');
+        }
 
         if (!Array.isArray(items) || items.length === 0)
             throw new Error('Không tìm thấy từ vựng phù hợp. Hãy thử đoạn văn khác!');
