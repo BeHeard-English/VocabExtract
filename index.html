@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard | Vocab Extract</title>
+    <title>Be Heard |Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
@@ -820,21 +820,16 @@ async function analyzeText() {
     showView('loading-view');
     startLoading();
 
-    // Prompt tối ưu hóa cho JSON Mode
-    const prompt = `Act as a CEFR language expert. 
-Task: Extract exactly ${selectedCount} distinct vocabulary words at ${selectedLevel} level from the text below.
-Requirement: 
-1. Use ONLY words that exist in the text.
-2. Format as a JSON array of objects.
-3. Each object must have: 
-   - "word": the extracted word.
-   - "sentence": the original sentence with the word replaced by "[BLANK]".
-   - "definition_vi": a brief Vietnamese definition (under 7 words).
+    // Prompt siêu ngắn gọn vì đã có Schema định hình
+    const prompt = `Extract exactly ${selectedCount} vocabulary words at ${selectedLevel} level from this text. 
+    Requirements:
+    1. Only words found in the text.
+    2. Format the sentence with [BLANK].
+    3. Brief Vietnamese definition.
 
-Text: ${text.slice(0, 5000)}`;
+    Text: ${text.slice(0, 5000)}`;
 
     try {
-        // Sử dụng model gemini-1.5-flash để ổn định nhất
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
         const response = await fetch(endpoint, {
@@ -843,22 +838,44 @@ Text: ${text.slice(0, 5000)}`;
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
-                    temperature: 0.1, // Thấp để AI bớt "sáng tạo" lung tung
-                    maxOutputTokens: 2048,
-                    response_mime_type: "application/json" // Kích hoạt JSON Mode
+                    temperature: 0.1,
+                    response_mime_type: "application/json",
+                    // ĐỊNH NGHĨA CẤU TRÚC DỮ LIỆU TẠI ĐÂY
+                    response_schema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                word: { type: "STRING" },
+                                sentence: { type: "STRING" },
+                                definition_vi: { type: "STRING" }
+                            },
+                            required: ["word", "sentence", "definition_vi"]
+                        }
+                    }
                 }
             })
         });
 
-        if (!response.ok) throw new Error(`Lỗi kết nối (${response.status})`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || "Lỗi kết nối API");
+        }
 
         const data = await response.json();
-        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        let items = [];
         
-        if (!rawText) throw new Error("Gemini không trả về dữ liệu.");
+        try {
+            const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            items = JSON.parse(rawText);
+        } catch (e) {
+            throw new Error("AI trả về dữ liệu không thể đọc được.");
+        }
 
-        const items = extractJSON(rawText);
-        if (!items || !Array.isArray(items)) throw new Error("Dữ liệu trả về không đúng cấu trúc.");
+        // Kiểm tra xem mảng có rỗng không (trường hợp text không có từ phù hợp)
+        if (!items || items.length === 0) {
+            throw new Error(`Không tìm thấy từ vựng nào phù hợp với trình độ ${selectedLevel} trong đoạn văn này.`);
+        }
 
         currentQuestions = items
             .filter(it => it.word && it.sentence && it.sentence.includes('[BLANK]'))
@@ -868,7 +885,9 @@ Text: ${text.slice(0, 5000)}`;
                 definition_vi: it.definition_vi || '',
             }));
 
-        if (currentQuestions.length === 0) throw new Error("Không trích xuất được từ vựng hợp lệ.");
+        if (currentQuestions.length === 0) {
+            throw new Error("Dữ liệu không khớp yêu cầu (thiếu từ hoặc thiếu [BLANK]).");
+        }
 
         allAnswers = currentQuestions.map(q => q.word);
         stopLoading();
@@ -877,7 +896,9 @@ Text: ${text.slice(0, 5000)}`;
     } catch (err) {
         stopLoading();
         showView('setup-view');
+        // Hiển thị lỗi chi tiết hơn để debug
         errDisp.innerHTML = `<div class="error-box">⚠️ <span>${err.message}</span></div>`;
+        console.error("Full Error:", err);
     }
 }
 
