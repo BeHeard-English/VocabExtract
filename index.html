@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard |Vocab Extract</title>
+    <title>Be Heard| Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
@@ -625,12 +625,12 @@
         </div>
 
         <p class="section-label">🔢 Số từ cần trích xuất</p>
-<div class="count-row">
-    <button class="count-btn" onclick="setCount(this,5)">5<small>nhanh</small></button>
-    <button class="count-btn active" onclick="setCount(this,10)">10<small>chuẩn</small></button>
-    <button class="count-btn" onclick="setCount(this,15)">15<small>đầy đủ</small></button>
-    <button class="count-btn" onclick="setCount(this,20)">20<small>thử thách</small></button>
-</div>
+        <div class="count-row">
+            <button class="count-btn" onclick="setCount(this,5)">5<small>nhanh</small></button>
+            <button class="count-btn" onclick="setCount(this,8)">8<small>ngắn</small></button>
+            <button class="count-btn active" onclick="setCount(this,10)">10<small>chuẩn</small></button>
+            <button class="count-btn" onclick="setCount(this,15)">15<small>đầy đủ</small></button>
+        </div>
 
         <div class="btn-row">
             <button class="btn btn-primary" onclick="analyzeText()">
@@ -1114,7 +1114,7 @@ function downloadPDF() {
     doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(22);
     doc.text('Fill in the Gaps', pageW/2, 14, { align:'center' });
     doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(200,210,255);
-    doc.text('Vocab Extract  ·  Be Heard  ·  Powered by Gemini', pageW/2, 23, { align:'center' });
+    doc.text('Vocab Extract  ·  Be Heard  ', pageW/2, 23, { align:'center' });
     doc.setFillColor(...LEVEL_RGB);
     doc.roundedRect(pageW/2-18,27,36,8,3,3,'F');
     doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9);
