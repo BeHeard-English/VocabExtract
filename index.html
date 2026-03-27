@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard | Vocab Extract</title>
+    <title>Be Heard|Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
@@ -814,9 +814,9 @@ ${text.slice(0, 6000)}`;
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: {
-                        temperature: 0.2,
-                        maxOutputTokens: 2048
-                    }
+    temperature: 0.2,
+    maxOutputTokens: 4096   // tăng lên
+}
                 })
             });
 
@@ -830,21 +830,17 @@ ${text.slice(0, 6000)}`;
             let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
             if (!raw) throw new Error('Gemini không trả về kết quả. Hãy thử lại!');
 
-            console.log('Raw Gemini response:', raw);
+            console.log('Raw Gemini response (full):', raw);
 
             // Clean up markdown and try to extract JSON array
             let cleaned = raw.replace(/```json\s*|\s*```/g, '').trim();
-            // If there is text before/after the array, try to find first JSON array
-            const match = cleaned.match(/\[\s*\{[\s\S]*\}\s*\]/);
-            if (match) cleaned = match[0];
-
-            let items;
-            try {
-                items = JSON.parse(cleaned);
-            } catch (e) {
-                console.error('JSON parse error:', e, 'Cleaned string:', cleaned);
-                throw new Error(`Không đọc được JSON từ Gemini. Phản hồi thô (200 ký tự đầu): ${raw.substring(0, 200)}...`);
-            }
+let match = cleaned.match(/\[[\s\S]*\]/);
+if (match) {
+    cleaned = match[0];
+} else {
+    // Nếu không tìm thấy mảng, thử tìm object riêng lẻ? Nhưng tốt nhất vẫn báo lỗi
+    throw new Error(`Không tìm thấy JSON array trong phản hồi. Raw: ${raw.substring(0, 500)}`);
+}
 
             if (!Array.isArray(items) || items.length === 0)
                 throw new Error('Không tìm thấy từ vựng phù hợp. Hãy thử đoạn văn khác!');
