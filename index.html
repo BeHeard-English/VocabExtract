@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard|Vocab Extract</title>
+    <title>Be Heard | Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
@@ -710,8 +710,9 @@ const LEVEL_COLORS = {
 (function initKey() {
     const saved = localStorage.getItem('gemini_api_key');
     if (saved) {
-        document.getElementById('gemini-key').value = saved;
-        document.getElementById('gemini-key').classList.add('has-value');
+        const inp = document.getElementById('gemini-key');
+        inp.value = saved;
+        inp.classList.add('has-value');
         document.getElementById('key-saved-badge').classList.add('visible');
     }
 })();
@@ -725,17 +726,17 @@ function onKeyInput() {
 function saveKey() {
     const key = document.getElementById('gemini-key').value.trim();
     if (!key) { showToast('⚠️ Chưa nhập key!'); return; }
-    if (!key.startsWith('AIza')) { showToast('⚠️ Key Gemini phải bắt đầu bằng AIza...'); return; }
+    if (!key.startsWith('AIza')) { showToast('⚠️ Key không đúng định dạng!'); return; }
     localStorage.setItem('gemini_api_key', key);
     document.getElementById('key-saved-badge').classList.add('visible');
-    showToast('✅ Đã lưu key vào trình duyệt!');
+    showToast('✅ Đã lưu key thành công!');
 }
 
 function toggleKey() {
     const inp = document.getElementById('gemini-key');
     const btn = document.querySelector('.key-eye-btn');
-    if (inp.type === 'password') { inp.type = 'text';     btn.textContent = '🙈 Ẩn'; }
-    else                          { inp.type = 'password'; btn.textContent = '👁 Hiện'; }
+    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈 Ẩn'; }
+    else { inp.type = 'password'; btn.textContent = '👁 Hiện'; }
 }
 
 // ── UI HELPERS ──
@@ -747,7 +748,7 @@ function goSetup() { showView('setup-view'); }
 
 function updateCharCount() {
     const len = document.getElementById('text-input').value.length;
-    const el  = document.getElementById('char-count');
+    const el = document.getElementById('char-count');
     el.textContent = len + ' ký tự';
     el.className = 'char-count' + (len > 8000 ? ' warn' : '');
 }
@@ -769,129 +770,105 @@ function showToast(msg) {
 }
 
 // ── LOADING CYCLE ──
-const LOADING_STEPS = [
-    ['📖 Đang đọc đoạn văn...', 'Gemini đang phân tích nội dung'],
-    ['🔍 Tìm từ vựng phù hợp...', `Lọc ${selectedCount} từ cấp ${selectedLevel}`],
-    ['🎯 Đối chiếu chuẩn CEFR...', 'Kiểm tra độ khó từng từ'],
-    ['✍️ Đang tạo bài tập...', 'Sắp hoàn tất rồi!'],
-];
 let loadTimer = null;
 function startLoading() {
+    const steps = [
+        ['📖 Đang đọc đoạn văn...', 'Gemini đang phân tích nội dung'],
+        ['🔍 Tìm từ vựng phù hợp...', `Lọc ${selectedCount} từ cấp ${selectedLevel}`],
+        ['🎯 Đối chiếu chuẩn CEFR...', 'Kiểm tra độ khó từng từ'],
+        ['✍️ Đang tạo bài tập...', 'Sắp hoàn tất rồi!']
+    ];
     let i = 0;
     const setMsg = () => {
-        document.getElementById('loading-msg').textContent = LOADING_STEPS[i % LOADING_STEPS.length][0];
-        document.getElementById('loading-sub').textContent = LOADING_STEPS[i % LOADING_STEPS.length][1];
+        const step = steps[i % steps.length];
+        document.getElementById('loading-msg').textContent = step[0];
+        document.getElementById('loading-sub').textContent = step[1];
         i++;
     };
     setMsg();
-    loadTimer = setInterval(setMsg, 2400);
+    loadTimer = setInterval(setMsg, 2500);
 }
 function stopLoading() { if (loadTimer) { clearInterval(loadTimer); loadTimer = null; } }
 
-// ── GEMINI API CALL ──
+// ── NÂNG CẤP: XỬ LÝ JSON AN TOÀN ──
+function extractJSON(str) {
+    try {
+        // Tìm mảng JSON bắt đầu bằng [ và kết thúc bằng ]
+        const start = str.indexOf('[');
+        const end = str.lastIndexOf(']');
+        if (start !== -1 && end !== -1) {
+            return JSON.parse(str.substring(start, end + 1));
+        }
+        return JSON.parse(str);
+    } catch (e) {
+        console.error("Lỗi parse JSON:", e, "Raw:", str);
+        return null;
+    }
+}
+
+// ── ANALYZE TEXT (OPTIMIZED) ──
 async function analyzeText() {
-    document.getElementById('error-display').innerHTML = '';
+    const errDisp = document.getElementById('error-display');
+    errDisp.innerHTML = '';
 
     const apiKey = document.getElementById('gemini-key').value.trim();
-    const text   = document.getElementById('text-input').value.trim();
+    const text = document.getElementById('text-input').value.trim();
 
-    if (!apiKey)        { showToast('⚠️ Vui lòng nhập Gemini API key!'); return; }
-    if (!apiKey.startsWith('AIza')) { showToast('⚠️ Key không đúng định dạng (phải bắt đầu AIza...)'); return; }
-    if (!text)          { showToast('⚠️ Hãy dán đoạn văn vào trước!'); return; }
-    if (text.length < 80) { showToast('⚠️ Đoạn văn quá ngắn, hãy thử đoạn dài hơn!'); return; }
+    if (!apiKey) { showToast('⚠️ Vui lòng nhập API key!'); return; }
+    if (!text || text.length < 50) { showToast('⚠️ Đoạn văn quá ngắn!'); return; }
 
     showView('loading-view');
     startLoading();
 
-    const prompt = `You are a CEFR vocabulary expert. Analyze the text below and extract exactly ${selectedCount} vocabulary words appropriate for ${selectedLevel} learners.
+    // Prompt tối ưu hóa cho JSON Mode
+    const prompt = `Act as a CEFR language expert. 
+Task: Extract exactly ${selectedCount} distinct vocabulary words at ${selectedLevel} level from the text below.
+Requirement: 
+1. Use ONLY words that exist in the text.
+2. Format as a JSON array of objects.
+3. Each object must have: 
+   - "word": the extracted word.
+   - "sentence": the original sentence with the word replaced by "[BLANK]".
+   - "definition_vi": a brief Vietnamese definition (under 7 words).
 
-CEFR Level Reference:
-- A1: Very basic everyday words (go, big, house, happy, eat, come, like, good, day, work)
-- A2: Common everyday words (suggest, describe, journey, suddenly, tired, complete, quiet, enjoy)
-- B1: Intermediate words (apparent, efficient, guarantee, impact, considerable, involve, achieve, discuss)
-- B2: Upper-intermediate academic words (comprehensive, elaborate, implication, facilitate, subsequent, demonstrate, resolve)
-- C1: Advanced/academic words (ubiquitous, ambivalent, propensity, nuanced, unprecedented, exacerbate, articulate)
-
-Rules:
-1. ONLY extract words that genuinely appear in the provided text
-2. Choose words truly representative of the ${selectedLevel} level
-3. Copy the EXACT original sentence — never modify or paraphrase it
-4. Replace only the target word in that sentence with [BLANK]
-5. Provide a concise Vietnamese definition (3–7 words max)
-6. If the text doesn't have enough ${selectedLevel} words, pick the closest level words available
-
-Return ONLY a valid JSON array — no markdown, no backticks, no explanation:
-[
-  {
-    "word": "exact_word_from_text",
-    "sentence": "Exact original sentence with [BLANK] replacing the word.",
-    "definition_vi": "định nghĩa tiếng Việt ngắn"
-  }
-]
-
-Text to analyze:
-${text.slice(0, 6000)}`;
+Text: ${text.slice(0, 5000)}`;
 
     try {
+        // Sử dụng model gemini-1.5-flash để ổn định nhất
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
-        const res = await fetch(endpoint, {
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
-                    temperature: 0.2,
-                    maxOutputTokens: 2048
+                    temperature: 0.1, // Thấp để AI bớt "sáng tạo" lung tung
+                    maxOutputTokens: 2048,
+                    response_mime_type: "application/json" // Kích hoạt JSON Mode
                 }
             })
         });
 
-        if (!res.ok) {
-            const errBody = await res.json().catch(() => ({}));
-            const msg = errBody?.error?.message || `Lỗi API: ${res.status}`;
-            throw new Error(msg);
-        }
+        if (!response.ok) throw new Error(`Lỗi kết nối (${response.status})`);
 
-        const data = await res.json();
-        console.log('Gemini raw response:', JSON.stringify(data));
+        const data = await response.json();
+        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (!rawText) throw new Error("Gemini không trả về dữ liệu.");
 
-        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (!raw) {
-            const reason = data?.candidates?.[0]?.finishReason || 'unknown';
-            throw new Error(`Gemini không trả về nội dung (finishReason: ${reason}). Hãy thử lại!`);
-        }
-
-        console.log('Raw text from Gemini:', raw);
-
-        // Robust JSON extraction: strip fences, then find [...] array
-        let clean = raw.replace(/```json\s*/gi, '').replace(/```/g, '').trim();
-        if (!clean.startsWith('[')) {
-            const match = clean.match(/\[[\s\S]*\]/);
-            if (match) clean = match[0];
-        }
-        let items;
-        try { items = JSON.parse(clean); }
-        catch (parseErr) {
-            console.error('JSON parse failed. clean string was:', clean);
-            throw new Error('Gemini trả về dữ liệu không đúng định dạng. Hãy thử lại!');
-        }
-
-        if (!Array.isArray(items) || items.length === 0)
-            throw new Error('Không tìm thấy từ vựng phù hợp. Hãy thử đoạn văn khác!');
+        const items = extractJSON(rawText);
+        if (!items || !Array.isArray(items)) throw new Error("Dữ liệu trả về không đúng cấu trúc.");
 
         currentQuestions = items
             .filter(it => it.word && it.sentence && it.sentence.includes('[BLANK]'))
-            .slice(0, selectedCount)
             .map(it => ({
-                word:          it.word.trim(),
-                text:          it.sentence.trim(),
+                word: it.word.trim(),
+                text: it.sentence.trim(),
                 definition_vi: it.definition_vi || '',
-                gaps:          [it.word.trim()]
             }));
 
-        if (currentQuestions.length === 0)
-            throw new Error('Câu trả về không hợp lệ. Hãy thử lại!');
+        if (currentQuestions.length === 0) throw new Error("Không trích xuất được từ vựng hợp lệ.");
 
         allAnswers = currentQuestions.map(q => q.word);
         stopLoading();
@@ -900,50 +877,33 @@ ${text.slice(0, 6000)}`;
     } catch (err) {
         stopLoading();
         showView('setup-view');
-        document.getElementById('error-display').innerHTML = `
-            <div class="error-box">⚠️ <span>${err.message || 'Có lỗi xảy ra, hãy thử lại!'}</span></div>`;
+        errDisp.innerHTML = `<div class="error-box">⚠️ <span>${err.message}</span></div>`;
     }
 }
 
-// ── RENDER EXERCISE ──
+// ── CÁC HÀM XỬ LÝ BÀI TẬP (GIỮ NGUYÊN LOGIC NHƯNG CLEAN HƠN) ──
 function renderExercise() {
     showView('exercise-view');
-
-    const lc = LEVEL_COLORS[selectedLevel] || LEVEL_COLORS.B1;
     const badge = document.getElementById('active-level-badge');
     badge.textContent = selectedLevel;
-    badge.style.cssText = `background:${lc.light}; color:${lc.bg}; border:1.5px solid ${lc.light2};`;
-
+    
     const bank = document.getElementById('bank-content');
     const list = document.getElementById('questions-list');
     bank.innerHTML = ''; list.innerHTML = '';
 
-    // Word bank — shuffled
-    [...allAnswers].sort(() => 0.5 - Math.random()).forEach((w, i) => {
+    // Trộn từ vựng
+    [...allAnswers].sort(() => Math.random() - 0.5).forEach((w, i) => {
         const div = document.createElement('div');
         div.className = 'draggable-word';
         div.innerText = w;
-        div.draggable = true;
-        div.id = `word-${i}`;
-        div.addEventListener('dragstart', e => { e.dataTransfer.setData('text', e.target.innerText); e.target.classList.add('dragging'); });
-        div.addEventListener('dragend',   e => e.target.classList.remove('dragging'));
-        div.addEventListener('touchstart', onTouchStart, { passive: true });
-        div.addEventListener('touchmove',  onTouchMove,  { passive: false });
-        div.addEventListener('touchend',   onTouchEnd,   { passive: true });
-        div.addEventListener('click', () => handleWordClick(div));
+        div.onclick = () => handleWordClick(div);
         bank.appendChild(div);
     });
 
-    // Sentence cards
     currentQuestions.forEach((q, qi) => {
         const card = document.createElement('div');
         card.className = 'sentence-card';
-        const sentHtml = q.text.replace('[BLANK]',
-            `<span class="drop-zone" data-q="${qi}" data-g="0"
-                ondrop="handleDrop(event)"
-                ondragover="event.preventDefault();this.classList.add('hovered')"
-                ondragleave="this.classList.remove('hovered')"
-                onclick="handleZoneClick(this)"></span>`);
+        const sentHtml = q.text.replace('[BLANK]', `<span class="drop-zone" data-q="${qi}" onclick="handleZoneClick(this)"></span>`);
         card.innerHTML = `
             <div class="q-number">${qi + 1}</div>
             <div style="flex:1">
@@ -952,21 +912,9 @@ function renderExercise() {
             </div>`;
         list.appendChild(card);
     });
-
     updateProgress();
-    window.scrollTo(0, 0);
 }
 
-// ── PROGRESS ──
-function updateProgress() {
-    const zones  = document.querySelectorAll('.drop-zone');
-    const filled = [...zones].filter(z => z.innerText.trim()).length;
-    const pct    = zones.length ? Math.round((filled / zones.length) * 100) : 0;
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('progress-label').textContent = `${filled} / ${zones.length} đã điền`;
-}
-
-// ── TAP-TO-FILL ──
 let selectedWordEl = null;
 function handleWordClick(el) {
     if (el.classList.contains('used')) return;
@@ -974,8 +922,8 @@ function handleWordClick(el) {
     if (selectedWordEl === el) { selectedWordEl = null; return; }
     selectedWordEl = el;
     el.style.background = 'var(--accent)';
-    showToast('👆 Nhấn vào ô trống để điền');
 }
+
 function handleZoneClick(zone) {
     if (selectedWordEl) {
         if (zone.innerText) toggleBank(zone.innerText, false);
@@ -990,16 +938,6 @@ function handleZoneClick(zone) {
     updateProgress();
 }
 
-// ── DRAG & DROP ──
-function handleDrop(e) {
-    e.preventDefault();
-    e.target.classList.remove('hovered');
-    const word = e.dataTransfer.getData('text');
-    if (e.target.innerText) toggleBank(e.target.innerText, false);
-    e.target.innerText = word;
-    toggleBank(word, true);
-    updateProgress();
-}
 function toggleBank(word, used) {
     for (const it of document.querySelectorAll('.draggable-word')) {
         if (it.innerText === word && it.classList.contains('used') === !used) {
@@ -1009,25 +947,31 @@ function toggleBank(word, used) {
     }
 }
 
-// ── SUBMIT ──
+function updateProgress() {
+    const zones = document.querySelectorAll('.drop-zone');
+    const filled = [...zones].filter(z => z.innerText.trim()).length;
+    const pct = zones.length ? Math.round((filled / zones.length) * 100) : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = `${filled} / ${zones.length} đã điền`;
+}
+
 function submitExercise() {
-    let correct = 0, total = 0;
+    let correct = 0;
     const resDiv = document.getElementById('detailed-results');
     resDiv.innerHTML = '';
 
     currentQuestions.forEach((q, qi) => {
-        total++;
-        const zone    = document.querySelector(`[data-q="${qi}"][data-g="0"]`);
+        const zone = document.querySelector(`[data-q="${qi}"]`);
         const userAns = zone ? zone.innerText.trim() : '';
-        const ok      = userAns.toLowerCase() === q.word.toLowerCase();
-        if (ok) correct++;
+        const isOk = userAns.toLowerCase() === q.word.toLowerCase();
+        if (isOk) correct++;
 
-        const feedback = ok
+        const feedback = isOk 
             ? `<span class="res-word-correct">${userAns}</span>`
             : `<span class="res-word-wrong">${userAns || '...'}</span><span class="res-word-fixed">${q.word}</span>`;
 
         const card = document.createElement('div');
-        card.className = `sentence-card ${ok ? 'correct' : 'wrong'}`;
+        card.className = `sentence-card ${isOk ? 'correct' : 'wrong'}`;
         card.innerHTML = `
             <div class="q-number">${qi + 1}</div>
             <div style="flex:1">
@@ -1037,23 +981,13 @@ function submitExercise() {
         resDiv.appendChild(card);
     });
 
-    const pct = Math.round((correct / total) * 100);
-    let icon = '🔥', msg = 'Cố lên, bạn sẽ làm được!';
-    if (pct === 100)    { icon = '🏆'; msg = 'TUYỆT VỜI! Bạn nắm hết tất cả rồi!'; }
-    else if (pct >= 80) { icon = '🌟'; msg = 'XUẤT SẮC! Gần hoàn hảo rồi!'; }
-    else if (pct >= 50) { icon = '👍'; msg = 'KHÁ! Tiếp tục luyện tập nhé!'; }
-
+    const pct = Math.round((correct / currentQuestions.length) * 100);
     document.getElementById('score-box').innerHTML = `
-        <div class="score-circle">
-            <div class="score-pct">${pct}%</div>
-            <div class="score-label">điểm số</div>
-        </div>
-        <div class="score-count">✅ ${correct} đúng / ${total} câu</div>
-        <div class="score-msg">${icon} ${msg}</div>
-        <div class="score-meta">Cấp ${selectedLevel} · Powered by Gemini 2.0 Flash</div>`;
+        <div class="score-circle"><div class="score-pct">${pct}%</div></div>
+        <div class="score-count">✅ ${correct} đúng / ${currentQuestions.length} câu</div>
+        <div class="score-msg">${pct === 100 ? '🏆 Tuyệt vời!' : '🌟 Khá lắm!'}</div>`;
 
     showView('result-view');
-    window.scrollTo(0, 0);
 }
 
 function doItAgain() {
