@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard| Vocab Extract</title>
+    <title>Be Heard | Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
@@ -433,7 +433,31 @@
         .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #4f6af5); border-radius: 99px; transition: width 0.4s ease; }
         .progress-label { font-size: 0.82rem; font-weight: 800; color: var(--text-muted); white-space: nowrap; }
 
-        /* ── SENTENCE CARDS ── */
+        /* ── PARAGRAPH CARD ── */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .paragraph-card {
+            background: #f8faff;
+            padding: 22px 26px;
+            border-radius: 18px;
+            border: 2px solid var(--border);
+            font-size: 1.05rem; font-weight: 600;
+            line-height: 2.8;
+            color: #1a1a3a;
+            animation: fadeInUp 0.35s ease both;
+            word-break: break-word;
+        }
+        /* ── HINT VIETNAMESE ── */
+        .hint-vi {
+            font-size: 0.80rem; font-weight: 700;
+            color: #0891b2;
+            font-style: italic;
+            margin: 0 5px 0 1px;
+            white-space: nowrap;
+        }
+        /* ── SENTENCE CARDS (kept for result view) ── */
         .sentence-card {
             background: #f8faff;
             padding: 16px 18px 12px;
@@ -441,25 +465,9 @@
             margin-bottom: 12px;
             border: 2px solid var(--border);
             display: flex; gap: 14px; align-items: flex-start;
-            font-size: 1.1rem; font-weight: 700; line-height: 1.85;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            animation: fadeInUp 0.3s ease both;
+            font-size: 1.05rem; font-weight: 700; line-height: 2.2;
+            transition: border-color 0.2s;
         }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(14px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .sentence-card:nth-child(1)  { animation-delay: 0.02s; }
-        .sentence-card:nth-child(2)  { animation-delay: 0.06s; }
-        .sentence-card:nth-child(3)  { animation-delay: 0.10s; }
-        .sentence-card:nth-child(4)  { animation-delay: 0.14s; }
-        .sentence-card:nth-child(5)  { animation-delay: 0.18s; }
-        .sentence-card:nth-child(6)  { animation-delay: 0.22s; }
-        .sentence-card:nth-child(7)  { animation-delay: 0.26s; }
-        .sentence-card:nth-child(8)  { animation-delay: 0.30s; }
-        .sentence-card:nth-child(9)  { animation-delay: 0.34s; }
-        .sentence-card:nth-child(10) { animation-delay: 0.38s; }
-        .sentence-card:hover { border-color: #b0baf0; box-shadow: 0 4px 16px rgba(3,19,131,0.06); }
         .sentence-card.correct { background: var(--success-bg); border-color: #a9dfbf; border-left: 5px solid var(--success); }
         .sentence-card.wrong   { background: var(--danger-bg);  border-color: #f1aeb5; border-left: 5px solid var(--danger); }
 
@@ -627,9 +635,9 @@
         <p class="section-label">🔢 Số từ cần trích xuất</p>
         <div class="count-row">
             <button class="count-btn" onclick="setCount(this,5)">5<small>nhanh</small></button>
-            <button class="count-btn" onclick="setCount(this,8)">8<small>ngắn</small></button>
             <button class="count-btn active" onclick="setCount(this,10)">10<small>chuẩn</small></button>
             <button class="count-btn" onclick="setCount(this,15)">15<small>đầy đủ</small></button>
+            <button class="count-btn" onclick="setCount(this,20)">20<small>nâng cao</small></button>
         </div>
 
         <div class="btn-row">
@@ -902,37 +910,63 @@ async function analyzeText() {
     }
 }
 
-// ── CÁC HÀM XỬ LÝ BÀI TẬP (GIỮ NGUYÊN LOGIC NHƯNG CLEAN HƠN) ──
+// ── CÁC HÀM XỬ LÝ BÀI TẬP ──
 function renderExercise() {
     showView('exercise-view');
-    const badge = document.getElementById('active-level-badge');
-    badge.textContent = selectedLevel;
-    
+    document.getElementById('active-level-badge').textContent = selectedLevel;
+
     const bank = document.getElementById('bank-content');
     const list = document.getElementById('questions-list');
     bank.innerHTML = ''; list.innerHTML = '';
 
-    // Trộn từ vựng
-    [...allAnswers].sort(() => Math.random() - 0.5).forEach((w, i) => {
+    // Trộn từ vựng, gắn drag & touch
+    [...allAnswers].sort(() => Math.random() - 0.5).forEach(w => {
         const div = document.createElement('div');
         div.className = 'draggable-word';
         div.innerText = w;
+        div.setAttribute('draggable', 'true');
         div.onclick = () => handleWordClick(div);
+        div.addEventListener('dragstart', onDragStart);
+        div.addEventListener('touchstart', onTouchStart, { passive: false });
+        div.addEventListener('touchmove',  onTouchMove,  { passive: false });
+        div.addEventListener('touchend',   onTouchEnd);
         bank.appendChild(div);
     });
 
+    // Tạo 1 đoạn văn liên tục
+    const para = document.createElement('div');
+    para.className = 'paragraph-card';
+
     currentQuestions.forEach((q, qi) => {
-        const card = document.createElement('div');
-        card.className = 'sentence-card';
-        const sentHtml = q.text.replace('[BLANK]', `<span class="drop-zone" data-q="${qi}" onclick="handleZoneClick(this)"></span>`);
-        card.innerHTML = `
-            <div class="q-number">${qi + 1}</div>
-            <div style="flex:1">
-                <div>${sentHtml}</div>
-                ${q.definition_vi ? `<div class="definition-badge">${q.definition_vi}</div>` : ''}
-            </div>`;
-        list.appendChild(card);
+        const parts = q.text.split('[BLANK]');
+
+        // Văn bản trước chỗ trống
+        para.appendChild(document.createTextNode(parts[0]));
+
+        // Chỗ trống (drop zone)
+        const zone = document.createElement('span');
+        zone.className = 'drop-zone';
+        zone.dataset.q = qi;
+        zone.onclick = () => handleZoneClick(zone);
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('hovered'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('hovered'));
+        zone.addEventListener('drop', e => onDropZone(e, zone));
+        para.appendChild(zone);
+
+        // Gợi ý nghĩa tiếng Việt ngay cạnh chỗ trống
+        if (q.definition_vi) {
+            const hint = document.createElement('em');
+            hint.className = 'hint-vi';
+            hint.textContent = '(' + q.definition_vi + ')';
+            para.appendChild(hint);
+        }
+
+        // Văn bản sau chỗ trống + khoảng cách giữa các câu
+        const afterText = (parts[1] || '').trimEnd();
+        para.appendChild(document.createTextNode(afterText + ' '));
     });
+
+    list.appendChild(para);
     updateProgress();
 }
 
@@ -981,32 +1015,57 @@ function submitExercise() {
     const resDiv = document.getElementById('detailed-results');
     resDiv.innerHTML = '';
 
-    currentQuestions.forEach((q, qi) => {
+    // Thu thập kết quả
+    const results = currentQuestions.map((q, qi) => {
         const zone = document.querySelector(`[data-q="${qi}"]`);
         const userAns = zone ? zone.innerText.trim() : '';
         const isOk = userAns.toLowerCase() === q.word.toLowerCase();
         if (isOk) correct++;
-
-        const feedback = isOk 
-            ? `<span class="res-word-correct">${userAns}</span>`
-            : `<span class="res-word-wrong">${userAns || '...'}</span><span class="res-word-fixed">${q.word}</span>`;
-
-        const card = document.createElement('div');
-        card.className = `sentence-card ${isOk ? 'correct' : 'wrong'}`;
-        card.innerHTML = `
-            <div class="q-number">${qi + 1}</div>
-            <div style="flex:1">
-                <div>${q.text.replace('[BLANK]', feedback)}</div>
-                ${q.definition_vi ? `<div class="definition-badge">${q.definition_vi}</div>` : ''}
-            </div>`;
-        resDiv.appendChild(card);
+        return { q, userAns, isOk };
     });
+
+    // Hiển thị kết quả dạng đoạn văn
+    const para = document.createElement('div');
+    para.className = 'paragraph-card';
+
+    results.forEach(({ q, userAns, isOk }) => {
+        const parts = q.text.split('[BLANK]');
+        para.appendChild(document.createTextNode(parts[0]));
+
+        if (isOk) {
+            const span = document.createElement('span');
+            span.className = 'res-word-correct';
+            span.textContent = q.word;
+            para.appendChild(span);
+        } else {
+            const wrong = document.createElement('span');
+            wrong.className = 'res-word-wrong';
+            wrong.textContent = userAns || '...';
+            para.appendChild(wrong);
+            const fixed = document.createElement('span');
+            fixed.className = 'res-word-fixed';
+            fixed.textContent = q.word;
+            para.appendChild(fixed);
+        }
+
+        if (q.definition_vi) {
+            const hint = document.createElement('em');
+            hint.className = 'hint-vi';
+            hint.textContent = '(' + q.definition_vi + ')';
+            para.appendChild(hint);
+        }
+
+        const afterText = (parts[1] || '').trimEnd();
+        para.appendChild(document.createTextNode(afterText + ' '));
+    });
+
+    resDiv.appendChild(para);
 
     const pct = Math.round((correct / currentQuestions.length) * 100);
     document.getElementById('score-box').innerHTML = `
         <div class="score-circle"><div class="score-pct">${pct}%</div></div>
         <div class="score-count">✅ ${correct} đúng / ${currentQuestions.length} câu</div>
-        <div class="score-msg">${pct === 100 ? '🏆 Tuyệt vời!' : '🌟 Khá lắm!'}</div>`;
+        <div class="score-msg">${pct === 100 ? '🏆 Tuyệt vời!' : pct >= 70 ? '🌟 Khá lắm!' : '💪 Cố lên nào!'}</div>`;
 
     showView('result-view');
 }
@@ -1014,6 +1073,34 @@ function submitExercise() {
 function doItAgain() {
     document.getElementById('detailed-results').innerHTML = '';
     renderExercise();
+}
+
+// ══════════════════════════════════════
+// TOUCH DRAG — mobile / tablet
+// ══════════════════════════════════════
+// HTML5 DRAG & DROP
+// ══════════════════════════════════════
+let dragWord = null;
+
+function onDragStart(e) {
+    dragWord = e.currentTarget;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragWord.innerText);
+    setTimeout(() => dragWord && dragWord.classList.add('dragging'), 0);
+}
+
+function onDropZone(e, zone) {
+    e.preventDefault();
+    zone.classList.remove('hovered');
+    if (!dragWord) return;
+    // Trả về từ cũ trong ô (nếu có)
+    if (zone.innerText.trim()) toggleBank(zone.innerText.trim(), false);
+    zone.innerText = dragWord.innerText;
+    toggleBank(dragWord.innerText, true);
+    dragWord.classList.remove('dragging');
+    dragWord = null;
+    selectedWordEl = null;
+    updateProgress();
 }
 
 // ══════════════════════════════════════
