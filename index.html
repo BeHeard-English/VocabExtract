@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard|Vocab Extract</title>
+    <title>Be Heard | Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
@@ -871,29 +871,12 @@ async function analyzeText() {
     showView('loading-view');
     startLoading();
 
-    // Xác định các cấp độ dự phòng dựa trên cấp chính được chọn
-    const FALLBACK_LEVELS = {
-        A1: ['A2'],
-        A2: ['A1','B1'],
-        B1: ['A2','B2'],
-        B2: ['B1','C1'],
-        C1: ['B2'],
-    };
-    const fallbacks = FALLBACK_LEVELS[selectedLevel] || [];
-    const fallbackNote = fallbacks.length
-        ? `If fewer than ${selectedCount} words are found at ${selectedLevel}, supplement with words from adjacent levels (${fallbacks.join(', ')}), clearly marking each word's actual CEFR level.`
-        : '';
-
-    const prompt = `From the text below, extract up to ${selectedCount} vocabulary words.
-
-Priority rules:
-1. Prefer words at CEFR level ${selectedLevel}.
-2. ${fallbackNote}
-3. Only use words that actually APPEAR in the text (exact form or common inflection).
-4. Return the base/dictionary form of each word.
-5. Provide a concise Vietnamese definition (2-6 words).
-6. Mark the actual CEFR level of each word.
-7. Do NOT repeat words. Aim for exactly ${selectedCount} words total.
+    // Chỉ cần word + definition_vi — câu ví dụ sẽ lấy từ đoạn văn gốc
+    const prompt = `From the text below, extract exactly ${selectedCount} vocabulary words at CEFR level ${selectedLevel}.
+Requirements:
+- Only use words that actually appear in the text.
+- Return only the base/dictionary form of the word.
+- Provide a concise Vietnamese definition for each word.
 
 Text: ${text.slice(0, 6000)}`;
 
@@ -906,7 +889,7 @@ Text: ${text.slice(0, 6000)}`;
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
-                    temperature: 0.15,
+                    temperature: 0.1,
                     response_mime_type: "application/json",
                     response_schema: {
                         type: "ARRAY",
@@ -914,10 +897,9 @@ Text: ${text.slice(0, 6000)}`;
                             type: "OBJECT",
                             properties: {
                                 word:          { type: "STRING" },
-                                definition_vi: { type: "STRING" },
-                                cefr_level:    { type: "STRING" }
+                                definition_vi: { type: "STRING" }
                             },
-                            required: ["word", "definition_vi", "cefr_level"]
+                            required: ["word", "definition_vi"]
                         }
                     }
                 }
@@ -942,14 +924,10 @@ Text: ${text.slice(0, 6000)}`;
             throw new Error(`Không tìm thấy từ vựng nào phù hợp với trình độ ${selectedLevel}.`);
         }
 
-        // Lưu danh sách từ — bao gồm cả cefr_level thực tế
+        // Lưu danh sách từ (không cần câu ví dụ nữa)
         currentQuestions = items
             .filter(it => it.word)
-            .map(it => ({
-                word: it.word.trim(),
-                definition_vi: it.definition_vi || '',
-                cefr_level: it.cefr_level || selectedLevel,
-            }));
+            .map(it => ({ word: it.word.trim(), definition_vi: it.definition_vi || '' }));
 
         // Xây dựng segments từ đoạn văn gốc
         currentSegments = buildParagraphSegments(originalText, currentQuestions);
@@ -1228,193 +1206,214 @@ function nearestZone(touch) {
 }
 
 // ══════════════════════════════════════
-// PDF EXPORT — Roboto font (Vietnamese support)
+// PDF EXPORT
 // ══════════════════════════════════════
 
-// Cache font base64 để tránh tải lại mỗi lần
-let _pdfFontCache = null;
-
-function _bufToBase64(buf) {
-    const bytes = new Uint8Array(buf);
-    let bin = '';
-    for (let i = 0; i < bytes.length; i += 8192) {
-        bin += String.fromCharCode(...bytes.subarray(i, Math.min(i + 8192, bytes.length)));
-    }
-    return btoa(bin);
-}
-
-async function _loadPDFFonts(doc) {
-    // Nếu đã cache thì dùng lại
-    if (_pdfFontCache) {
-        _applyFonts(doc, _pdfFontCache);
-        return true;
-    }
-    // Roboto hỗ trợ đầy đủ tiếng Việt có dấu
-    const BASE = 'https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/';
-    try {
-        const [rR, rB, rI] = await Promise.all([
-            fetch(BASE + 'Roboto-Regular.ttf'),
-            fetch(BASE + 'Roboto-Bold.ttf'),
-            fetch(BASE + 'Roboto-Italic.ttf'),
-        ]);
-        if (!rR.ok || !rB.ok || !rI.ok) throw new Error('font fetch failed');
-        const [bR, bB, bI] = await Promise.all([rR.arrayBuffer(), rB.arrayBuffer(), rI.arrayBuffer()]);
-        _pdfFontCache = {
-            regular: _bufToBase64(bR),
-            bold:    _bufToBase64(bB),
-            italic:  _bufToBase64(bI),
-        };
-        _applyFonts(doc, _pdfFontCache);
-        return true;
-    } catch (e) {
-        console.warn('Roboto font load failed, falling back:', e);
-        return false;   // caller sẽ dùng helvetica + normalizeVi
-    }
-}
-
-function _applyFonts(doc, cache) {
-    doc.addFileToVFS('Roboto-Regular.ttf', cache.regular);
-    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
-    doc.addFileToVFS('Roboto-Bold.ttf', cache.bold);
-    doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
-    doc.addFileToVFS('Roboto-Italic.ttf', cache.italic);
-    doc.addFont('Roboto-Italic.ttf', 'Roboto', 'italic');
-}
-
-// Fallback: bỏ dấu tiếng Việt nếu không load được font
-function _stripVi(str) {
+// ── Chuyển tiếng Việt sang Latin để tránh lỗi font trong jsPDF ──
+function normalizeVi(str) {
     if (!str) return '';
-    return str.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D');
+    const map = {
+        'à':'a','á':'a','â':'a','ã':'a','ä':'a','å':'a',
+        'è':'e','é':'e','ê':'e','ë':'e',
+        'ì':'i','í':'i','î':'i','ï':'i',
+        'ò':'o','ó':'o','ô':'o','õ':'o','ö':'o',
+        'ù':'u','ú':'u','û':'u','ü':'u',
+        'ý':'y','ÿ':'y',
+        'À':'A','Á':'A','Â':'A','Ã':'A','Ä':'A','Å':'A',
+        'È':'E','É':'E','Ê':'E','Ë':'E',
+        'Ì':'I','Í':'I','Î':'I','Ï':'I',
+        'Ò':'O','Ó':'O','Ô':'O','Õ':'O','Ö':'O',
+        'Ù':'U','Ú':'U','Û':'U','Ü':'U',
+        'Ý':'Y',
+        // Tiếng Việt đặc biệt
+        'ắ':'a','ặ':'a','ằ':'a','ẳ':'a','ẵ':'a',
+        'ấ':'a','ậ':'a','ầ':'a','ẩ':'a','ẫ':'a',
+        'ả':'a','ạ':'a',
+        'ế':'e','ệ':'e','ề':'e','ể':'e','ễ':'e',
+        'ẻ':'e','ẹ':'e',
+        'ị':'i','ỉ':'i',
+        'ố':'o','ộ':'o','ồ':'o','ổ':'o','ỗ':'o',
+        'ớ':'o','ợ':'o','ờ':'o','ở':'o','ỡ':'o',
+        'ỏ':'o','ọ':'o',
+        'ứ':'u','ự':'u','ừ':'u','ử':'u','ữ':'u',
+        'ủ':'u','ụ':'u',
+        'ứ':'u','ự':'u',
+        'ỳ':'y','ỵ':'y','ỷ':'y','ỹ':'y',
+        'đ':'d','Đ':'D',
+        'Ắ':'A','Ặ':'A','Ằ':'A','Ẳ':'A','Ẵ':'A',
+        'Ấ':'A','Ậ':'A','Ầ':'A','Ẩ':'A','Ẫ':'A',
+        'Ả':'A','Ạ':'A',
+        'Ế':'E','Ệ':'E','Ề':'E','Ể':'E','Ễ':'E',
+        'Ẻ':'E','Ẹ':'E',
+        'Ị':'I','Ỉ':'I',
+        'Ố':'O','Ộ':'O','Ồ':'O','Ổ':'O','Ỗ':'O',
+        'Ớ':'O','Ợ':'O','Ờ':'O','Ở':'O','Ỡ':'O',
+        'Ỏ':'O','Ọ':'O',
+        'Ứ':'U','Ự':'U','Ừ':'U','Ử':'U','Ữ':'U',
+        'Ủ':'U','Ụ':'U',
+        'Ỳ':'Y','Ỵ':'Y','Ỷ':'Y','Ỹ':'Y',
+    };
+    return str.split('').map(c => map[c] || c).join('');
 }
 
-async function downloadPDF() {
+function downloadPDF() {
     if (!currentSegments.length) { showToast('⚠️ Chưa có bài tập!'); return; }
-    if (typeof window.jspdf === 'undefined') { showToast('⏳ Thư viện PDF đang tải, thử lại!'); return; }
-
-    showToast('📥 Đang tải font và tạo PDF...');
+    if (typeof window.jspdf === 'undefined') { showToast('⏳ Thư viện PDF đang tải, thử lại sau!'); return; }
+    showToast('📥 Đang tạo PDF...');
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const doc   = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();   // 210
+    const pageH = doc.internal.pageSize.getHeight();  // 297
+    const M  = 16;          // margin trái/phải
+    const cW = pageW - M * 2;  // 178mm
+    const BOTTOM = pageH - 16; // vùng footer bắt đầu
 
-    // ── Load font Roboto (tiếng Việt đầy đủ dấu) ──
-    const fontLoaded = await _loadPDFFonts(doc);
-    const FONT = fontLoaded ? 'Roboto' : 'helvetica';
-    // Nếu dùng helvetica (fallback), phải bỏ dấu để không bị ký tự lỗi
-    const T = fontLoaded ? (s => s || '') : _stripVi;
+    const PRIMARY = [3, 19, 131];
+    const ACCENT  = [255, 217, 61];
+    const BORDER  = [218, 225, 245];
+    const SUCCESS = [39, 174, 96];
 
-    const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
-    const M      = 16;
-    const cW     = pageW - M * 2;
-    const BOTTOM = pageH - 16;
+    const lc = LEVEL_COLORS[selectedLevel] || LEVEL_COLORS.B1;
+    function hexToRgb(hex) {
+        return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+    }
+    const LEVEL_RGB = hexToRgb(lc.bg);
 
-    const C_PRIMARY = [3,19,131];
-    const C_ACCENT  = [255,217,61];
-    const C_BORDER  = [218,225,245];
-    const C_SUCCESS = [39,174,96];
-    const C_DARK    = [25,25,50];
-    const C_MUTED   = [120,130,160];
-    const C_BLUE    = [70,110,185];
+    let pg = 1, totalPg = '?';  // tổng trang tính sau
 
-    function hexToRgb(h) { return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
-    const C_LEVEL = hexToRgb((LEVEL_COLORS[selectedLevel]||LEVEL_COLORS.B1).bg);
-
-    let pg = 1;
-
-    // ── Helpers ──
-    function footer(n) {
-        doc.setFont(FONT,'normal'); doc.setFontSize(8); doc.setTextColor(150,150,160);
-        doc.text(`Be Heard - Vocab Extract - Level ${selectedLevel}`, M, pageH-8);
-        doc.text(`${n}`, pageW-M, pageH-8, { align:'right' });
-        doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.3);
-        doc.line(M, pageH-12, pageW-M, pageH-12);
+    // ── Helper: footer ──
+    function drawFooter(cur) {
+        doc.setFontSize(8); doc.setTextColor(150,150,160); doc.setFont('helvetica','normal');
+        doc.text(`Be Heard - Vocab Extract - Level ${selectedLevel}`, M, pageH - 8);
+        doc.text(`Trang ${cur}`, pageW - M, pageH - 8, { align: 'right' });
+        doc.setDrawColor(...BORDER); doc.setLineWidth(0.3);
+        doc.line(M, pageH - 12, pageW - M, pageH - 12);
     }
 
+    // ── Helper: thêm trang mới ──
     function newPage() {
-        footer(pg); doc.addPage(); pg++;
-        return 20;
+        drawFooter(pg);
+        doc.addPage();
+        pg++;
+        return 20; // y bắt đầu trang mới
     }
 
-    function ensureY(y, need) {
-        return (y + need > BOTTOM) ? newPage() : y;
-    }
-
-    // splitText helper — wraps T() automatically
-    function split(text, maxW, fontSize) {
+    // ── Helper: vẽ text nhiều dòng, tự xuống trang ──
+    // Trả về y mới sau khi vẽ xong
+    function drawWrappedText(text, x, startY, maxW, fontSize, fontStyle, colorRGB) {
         doc.setFontSize(fontSize);
-        return doc.splitTextToSize(T(text), maxW);
+        doc.setFont('helvetica', fontStyle || 'normal');
+        doc.setTextColor(...(colorRGB || [30,30,50]));
+        const lines = doc.splitTextToSize(normalizeVi(text), maxW);
+        const lineH = fontSize * 0.45;
+        let y = startY;
+        for (const ln of lines) {
+            if (y + lineH > BOTTOM) y = newPage();
+            doc.text(ln, x, y);
+            y += lineH;
+        }
+        return y;
     }
 
-    // ════════════════════════════════════════
-    // HEADER
-    // ════════════════════════════════════════
-    doc.setFillColor(...C_PRIMARY); doc.rect(0,0,pageW,38,'F');
-    doc.setFillColor(...C_ACCENT);  doc.rect(0,38,pageW,3.5,'F');
+    // ── Helper: đảm bảo còn đủ chỗ, nếu không thì xuống trang ──
+    function ensureSpace(y, needed) {
+        if (y + needed > BOTTOM) return newPage();
+        return y;
+    }
 
-    doc.setFont(FONT,'bold'); doc.setFontSize(22); doc.setTextColor(255,255,255);
-    doc.text('Fill in the Gaps', pageW/2, 14, { align:'center' });
-    doc.setFont(FONT,'normal'); doc.setFontSize(10); doc.setTextColor(200,210,255);
-    doc.text('Vocab Extract  -  Be Heard', pageW/2, 23, { align:'center' });
+    // ════════════════════════════════════
+    // TRANG 1 — HEADER
+    // ════════════════════════════════════
+    doc.setFillColor(...PRIMARY);
+    doc.rect(0, 0, pageW, 38, 'F');
+    doc.setFillColor(...ACCENT);
+    doc.rect(0, 38, pageW, 3.5, 'F');
 
-    doc.setFillColor(...C_LEVEL);
-    doc.roundedRect(pageW/2-18,27,36,8,3,3,'F');
-    doc.setFont(FONT,'bold'); doc.setFontSize(9); doc.setTextColor(255,255,255);
-    doc.text(`Level ${selectedLevel}`, pageW/2, 32.5, { align:'center' });
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(22);
+    doc.text('Fill in the Gaps', pageW/2, 14, { align: 'center' });
+    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(200,210,255);
+    doc.text('Vocab Extract  -  Be Heard', pageW/2, 23, { align: 'center' });
 
-    const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
-    doc.setFont(FONT,'normal'); doc.setFontSize(8); doc.setTextColor(200,210,255);
-    doc.text(today, pageW/2, 37, { align:'center' });
+    doc.setFillColor(...LEVEL_RGB);
+    doc.roundedRect(pageW/2 - 18, 27, 36, 8, 3, 3, 'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text(`Level ${selectedLevel}`, pageW/2, 32.5, { align: 'center' });
+
+    const today = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(200,210,255);
+    doc.text(today, pageW/2, 37, { align: 'center' });
 
     let y = 50;
 
-    // ── STUDENT INFO ──
-    y = ensureY(y, 22);
-    doc.setFillColor(238,242,255); doc.roundedRect(M,y,cW,20,3,3,'F');
-    doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.5); doc.roundedRect(M,y,cW,20,3,3,'S');
-    doc.setFont(FONT,'bold'); doc.setFontSize(9); doc.setTextColor(...C_PRIMARY);
-    doc.text('Name:', M+5, y+9);
+    // ── STUDENT INFO BOX ──
+    y = ensureSpace(y, 20);
+    doc.setFillColor(238,242,255);
+    doc.roundedRect(M, y, cW, 18, 3, 3, 'F');
+    doc.setDrawColor(...BORDER); doc.setLineWidth(0.5);
+    doc.roundedRect(M, y, cW, 18, 3, 3, 'S');
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...PRIMARY);
+    doc.text('Name:', M+5, y+8);
     doc.setDrawColor(160,170,210); doc.setLineWidth(0.4);
-    doc.line(M+20, y+9.5, M+92, y+9.5);
-    doc.text('Class:', M+96, y+9);
-    doc.line(M+110, y+9.5, M+148, y+9.5);
-    doc.text('Score:', M+152, y+9);
-    doc.line(M+167, y+9.5, M+cW, y+9.5);
-    doc.setFont(FONT,'normal'); doc.setFontSize(7.5); doc.setTextColor(...C_MUTED);
-    doc.text('Instructions: Use the words from the Word Bank to fill in the blanks.', M+5, y+17);
-    y += 26;
+    doc.line(M+20, y+8.5, M+92, y+8.5);
+
+    doc.text('Class:', M+96, y+8);
+    doc.line(M+110, y+8.5, M+148, y+8.5);
+
+    doc.text('Score:', M+152, y+8);
+    doc.line(M+166, y+8.5, M+cW, y+8.5);
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(120,130,160);
+    doc.text('Instructions: Use the words from the Word Bank to fill in the blanks.', M+5, y+15);
+    y += 24;
 
     // ── WORD BANK ──
     const bWords = [...new Set(allAnswers)].sort();
-    const bCols  = 4, bCellW = cW/bCols;
-    const bRows  = Math.ceil(bWords.length/bCols);
-    const bankH  = bRows*9 + 10;
+    const bCols  = 4;
+    const bCellW = cW / bCols;
+    const bRows  = Math.ceil(bWords.length / bCols);
+    const bankH  = bRows * 9 + 10;
 
-    y = ensureY(y, 10 + bankH);
-    doc.setFillColor(...C_PRIMARY); doc.roundedRect(M,y,cW,10,2,2,'F');
-    doc.setFont(FONT,'bold'); doc.setFontSize(10); doc.setTextColor(255,255,255);
+    y = ensureSpace(y, 10 + bankH);
+
+    // Header strip
+    doc.setFillColor(...PRIMARY);
+    doc.roundedRect(M, y, cW, 10, 2, 2, 'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
     doc.text('WORD BANK', M+5, y+7);
     y += 10;
-    doc.setFillColor(248,250,255); doc.roundedRect(M,y,cW,bankH,2,2,'F');
-    doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.5); doc.roundedRect(M,y,cW,bankH,2,2,'S');
-    y += 6;
-    bWords.forEach((w,i) => {
-        const col=i%bCols, row=Math.floor(i/bCols);
-        const cx=M+col*bCellW+4, cy=y+row*9, chipW=bCellW-6;
-        doc.setFillColor(255,255,255); doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.4);
-        doc.roundedRect(cx-1,cy-5.5,chipW,8,2,2,'FD');
-        doc.setFont(FONT,'bold'); doc.setFontSize(9); doc.setTextColor(...C_PRIMARY);
-        doc.text(w, cx+chipW/2-1, cy, { align:'center' });
-    });
-    y += bRows*9 + 8;
 
-    // ── FILL IN THE BLANKS ──
-    y = ensureY(y, 14);
-    doc.setFillColor(...C_PRIMARY); doc.roundedRect(M,y,cW,10,2,2,'F');
-    doc.setFont(FONT,'bold'); doc.setFontSize(10); doc.setTextColor(255,255,255);
+    // Body
+    doc.setFillColor(248,250,255);
+    doc.roundedRect(M, y, cW, bankH, 2, 2, 'F');
+    doc.setDrawColor(...BORDER); doc.setLineWidth(0.5);
+    doc.roundedRect(M, y, cW, bankH, 2, 2, 'S');
+    y += 6;
+
+    bWords.forEach((w, i) => {
+        const col   = i % bCols;
+        const row   = Math.floor(i / bCols);
+        const cx    = M + col * bCellW + 4;
+        const cy    = y + row * 9;
+        const chipW = bCellW - 6;
+        doc.setFillColor(255,255,255);
+        doc.setDrawColor(...BORDER); doc.setLineWidth(0.4);
+        doc.roundedRect(cx - 1, cy - 5.5, chipW, 8, 2, 2, 'FD');
+        doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...PRIMARY);
+        doc.text(w, cx + chipW/2 - 1, cy, { align: 'center' });
+    });
+    y += bRows * 9 + 8;
+
+    // ── FILL IN THE BLANKS — đoạn văn gốc ──
+    y = ensureSpace(y, 14);
+    doc.setFillColor(...PRIMARY);
+    doc.roundedRect(M, y, cW, 10, 2, 2, 'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
     doc.text('FILL IN THE BLANKS', M+5, y+7);
     y += 14;
 
-    // Xây đoạn văn có đánh số chỗ trống
+    // Xây chuỗi đoạn văn có đánh số blank
     let blankIdx = 0;
     let paraText = '';
     currentSegments.forEach(seg => {
@@ -1422,135 +1421,156 @@ async function downloadPDF() {
             paraText += seg.content;
         } else {
             blankIdx++;
-            paraText += ` (${blankIdx}) ____________ `;
+            paraText += `(${blankIdx}) ____________ `;
         }
     });
 
-    // Render đoạn văn — tự xuống trang theo từng chunk
-    const paraFS  = 10.5, paraLH = 5.8;
-    doc.setFont(FONT,'normal'); doc.setFontSize(paraFS); doc.setTextColor(...C_DARK);
-    const paraLines = split(paraText, cW-10, paraFS);
+    // Vẽ đoạn văn — font 10.5, line-height 5.5mm, tự xuống trang
+    const paraFontSize = 10.5;
+    const paraLineH    = 5.8;
+    doc.setFont('helvetica','normal'); doc.setFontSize(paraFontSize); doc.setTextColor(25,25,50);
 
-    let li = 0;
-    while (li < paraLines.length) {
-        const spaceLeft = BOTTOM - y - 4;
-        const linesInPage = Math.max(1, Math.floor(spaceLeft / paraLH));
-        const chunk = paraLines.slice(li, li + linesInPage);
-        const chunkH = chunk.length * paraLH + 8;
+    // Padding box xung quanh đoạn văn
+    const paraLines = doc.splitTextToSize(normalizeVi(paraText), cW - 10);
 
-        doc.setFillColor(248,250,255); doc.roundedRect(M,y-2,cW,chunkH,2,2,'F');
-        doc.setDrawColor(...C_BORDER); doc.setLineWidth(0.3); doc.roundedRect(M,y-2,cW,chunkH,2,2,'S');
-        doc.setFont(FONT,'normal'); doc.setFontSize(paraFS); doc.setTextColor(...C_DARK);
-        chunk.forEach((ln,j) => doc.text(ln, M+5, y+4+j*paraLH));
+    // Vẽ từng dòng, mỗi lần check tràn trang
+    // Vẽ box nền cho từng "chunk" dòng trong cùng 1 trang
+    let lineStart = 0;
+    while (lineStart < paraLines.length) {
+        // Tính bao nhiêu dòng vừa trong trang này
+        const spaceAvail = BOTTOM - y - 4;
+        const linesInPage = Math.max(1, Math.floor(spaceAvail / paraLineH));
+        const chunk = paraLines.slice(lineStart, lineStart + linesInPage);
+        const chunkH = chunk.length * paraLineH + 6;
+
+        doc.setFillColor(248,250,255);
+        doc.roundedRect(M, y - 2, cW, chunkH, 2, 2, 'F');
+        doc.setDrawColor(...BORDER); doc.setLineWidth(0.3);
+        doc.roundedRect(M, y - 2, cW, chunkH, 2, 2, 'S');
+
+        doc.setFont('helvetica','normal'); doc.setFontSize(paraFontSize); doc.setTextColor(25,25,50);
+        chunk.forEach((ln, li) => {
+            doc.text(ln, M + 5, y + 4 + li * paraLineH);
+        });
 
         y += chunkH + 4;
-        li += linesInPage;
-        if (li < paraLines.length) y = newPage();
+        lineStart += linesInPage;
+        if (lineStart < paraLines.length) y = newPage();
     }
+
     y += 4;
 
-    // ── VOCABULARY HINTS ──
+    // ── GỢI Ý NGHĨA (chỉ word — Latin; definition — normalizeVi) ──
     const hintSegs = currentSegments.filter(s => s.type === 'blank');
     if (hintSegs.length) {
-        y = ensureY(y, 14);
-        doc.setFillColor(...C_PRIMARY); doc.roundedRect(M,y,cW,10,2,2,'F');
-        doc.setFont(FONT,'bold'); doc.setFontSize(10); doc.setTextColor(255,255,255);
+        y = ensureSpace(y, 14);
+        doc.setFillColor(...PRIMARY);
+        doc.roundedRect(M, y, cW, 10, 2, 2, 'F');
+        doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
         doc.text('VOCABULARY HINTS', M+5, y+7);
         y += 12;
 
-        const hCols=2, hCW=cW/hCols, rowH=11;
-        hintSegs.forEach((seg,i) => {
+        const hCols  = 2;
+        const hCellW = cW / hCols;
+        const rowH   = 10;
+
+        hintSegs.forEach((seg, i) => {
             const col = i % hCols;
+            // Khi bắt đầu hàng mới (col==0), check page break
             if (col === 0) {
-                y = ensureY(y, rowH);
-                if (Math.floor(i/hCols)%2===0) {
-                    doc.setFillColor(248,250,255); doc.rect(M,y-1,cW,rowH,'F');
+                y = ensureSpace(y, rowH);
+                // Nền xen kẽ
+                if (Math.floor(i / hCols) % 2 === 0) {
+                    doc.setFillColor(248,250,255);
+                    doc.rect(M, y - 1, cW, rowH, 'F');
                 }
             }
-            const hx = M + col*hCW;
+            const hx = M + col * hCellW;
 
             // Số thứ tự
-            doc.setFillColor(...C_ACCENT); doc.roundedRect(hx+1,y,8,7,1.5,1.5,'F');
-            doc.setFont(FONT,'bold'); doc.setFontSize(8); doc.setTextColor(...C_PRIMARY);
-            doc.text(String(i+1), hx+5, y+5.5, { align:'center' });
+            doc.setFillColor(...ACCENT);
+            doc.roundedRect(hx + 1, y, 8, 7, 1.5, 1.5, 'F');
+            doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...PRIMARY);
+            doc.text(String(i + 1), hx + 5, y + 5.5, { align: 'center' });
 
-            // Từ tiếng Anh + level badge
-            doc.setFont(FONT,'bold'); doc.setFontSize(9); doc.setTextColor(...C_PRIMARY);
-            doc.text(seg.word, hx+12, y+5.5);
+            // Từ tiếng Anh
+            doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...PRIMARY);
+            doc.text(seg.word, hx + 12, y + 5);
 
-            // CEFR level nếu khác với selectedLevel
-            const lvl = seg.cefr_level || selectedLevel;
-            if (lvl !== selectedLevel) {
-                doc.setFontSize(7); doc.setTextColor(150,100,200);
-                doc.text(`[${lvl}]`, hx+12 + doc.getTextWidth(seg.word) + 2, y+5.5);
+            // Nghĩa tiếng Việt (normalize để tránh lỗi font)
+            const defText = normalizeVi(seg.definition_vi || '');
+            doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(80,110,180);
+            // Cắt nếu quá dài
+            const maxDefW = hCellW - 50;
+            const defLines = doc.splitTextToSize(defText, maxDefW);
+            doc.text(defLines[0] || '', hx + 38, y + 5);
+
+            // Xuống hàng khi cột phải xong (hoặc phần tử cuối)
+            if (col === hCols - 1 || i === hintSegs.length - 1) {
+                y += rowH;
             }
-
-            // Nghĩa tiếng Việt — ĐẦY ĐỦ DẤU khi dùng Roboto
-            const defText = T(seg.definition_vi || '');
-            const maxDW   = hCW - 52;
-            doc.setFont(FONT,'italic'); doc.setFontSize(8.5); doc.setTextColor(...C_BLUE);
-            const dLines = doc.splitTextToSize(defText, maxDW);
-            doc.text(dLines[0]||'', hx+44, y+5.5);
-
-            if (col === hCols-1 || i === hintSegs.length-1) y += rowH;
         });
         y += 4;
     }
 
-    // ════════════════════════════════════════
-    // ANSWER KEY — trang riêng
-    // ════════════════════════════════════════
+    // ════════════════════════════════════
+    // TRANG ANSWER KEY
+    // ════════════════════════════════════
     y = newPage();
 
-    doc.setFillColor(...C_PRIMARY); doc.rect(0,0,pageW,30,'F');
-    doc.setFillColor(...C_LEVEL);   doc.rect(0,30,pageW,3,'F');
-    doc.setFont(FONT,'bold'); doc.setFontSize(20); doc.setTextColor(255,255,255);
-    doc.text('Answer Key', pageW/2, 14, { align:'center' });
-    doc.setFont(FONT,'normal'); doc.setFontSize(9); doc.setTextColor(200,210,255);
-    doc.text('For Teacher Use Only', pageW/2, 23, { align:'center' });
+    doc.setFillColor(...PRIMARY);
+    doc.rect(0, 0, pageW, 30, 'F');
+    doc.setFillColor(...LEVEL_RGB);
+    doc.rect(0, 30, pageW, 3, 'F');
+
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18);
+    doc.text('Answer Key', pageW/2, 13, { align: 'center' });
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(200,210,255);
+    doc.text('For Teacher Use Only', pageW/2, 23, { align: 'center' });
+
     y = 42;
+    const aC  = 2;
+    const aCW = cW / aC;
+    const aRowH = 13;
 
-    const ansSegs = currentSegments.filter(s => s.type === 'blank');
-    const aC=2, aCW=cW/aC, aRowH=13;
-
-    ansSegs.forEach((seg,i) => {
+    const answerSegs = currentSegments.filter(s => s.type === 'blank');
+    answerSegs.forEach((seg, i) => {
         const col = i % aC;
-        if (col===0) {
-            y = ensureY(y, aRowH);
-            if (Math.floor(i/aC)%2===0) {
-                doc.setFillColor(248,250,255); doc.rect(M,y-2,cW,aRowH,'F');
+        if (col === 0) {
+            y = ensureSpace(y, aRowH);
+            // Nền xen kẽ
+            if (Math.floor(i / aC) % 2 === 0) {
+                doc.setFillColor(248,250,255);
+                doc.rect(M, y - 2, cW, aRowH, 'F');
             }
         }
-        const ax = M + col*aCW;
+        const ax = M + col * aCW;
 
-        // Số
-        doc.setFillColor(...C_ACCENT); doc.roundedRect(ax,y-1,8,8,1.5,1.5,'F');
-        doc.setFont(FONT,'bold'); doc.setFontSize(8); doc.setTextColor(...C_PRIMARY);
-        doc.text(String(i+1), ax+4, y+5, { align:'center' });
+        // Số thứ tự
+        doc.setFillColor(...ACCENT);
+        doc.roundedRect(ax, y - 1, 8, 8, 1.5, 1.5, 'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...PRIMARY);
+        doc.text(String(i + 1), ax + 4, y + 5, { align: 'center' });
 
-        // Đáp án
-        doc.setFont(FONT,'bold'); doc.setFontSize(12); doc.setTextColor(...C_SUCCESS);
-        doc.text(seg.word, ax+12, y+5.5);
+        // Từ đáp án
+        doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...SUCCESS);
+        doc.text(seg.word, ax + 12, y + 5.5);
 
-        // CEFR badge nếu từ cấp phụ
-        const lvl = seg.cefr_level || selectedLevel;
-        if (lvl !== selectedLevel) {
-            doc.setFont(FONT,'normal'); doc.setFontSize(7); doc.setTextColor(150,100,200);
-            doc.text(`[${lvl}]`, ax+12 + doc.getTextWidth(seg.word)*1.1 + 2, y+5.5);
+        // Nghĩa tiếng Việt
+        const defNorm = normalizeVi(seg.definition_vi || '');
+        if (defNorm) {
+            doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(130,140,180);
+            const maxDW = aCW - 28;
+            const dLines = doc.splitTextToSize(defNorm, maxDW);
+            doc.text(dLines[0], ax + 12, y + 11);
         }
 
-        // Nghĩa tiếng Việt ĐẦY ĐỦ DẤU
-        const defTxt = T(seg.definition_vi || '');
-        if (defTxt) {
-            doc.setFont(FONT,'italic'); doc.setFontSize(8); doc.setTextColor(130,140,180);
-            const dd = doc.splitTextToSize(defTxt, aCW-28);
-            doc.text(dd[0], ax+12, y+11);
+        if (col === aC - 1 || i === answerSegs.length - 1) {
+            y += aRowH;
         }
-
-        if (col===aC-1 || i===ansSegs.length-1) y += aRowH;
     });
 
-    footer(pg);
+    drawFooter(pg);
     doc.save(`vocab-extract-${selectedLevel}.pdf`);
     showToast('✅ PDF đã tải xuống!');
 }
