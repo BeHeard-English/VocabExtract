@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard | Vocab Extract</title>
+    <title>Be Heard|Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
 
@@ -705,6 +705,8 @@ let selectedLevel = 'B1';
 let selectedCount = 10;
 let currentQuestions = [];
 let allAnswers = [];
+let originalText = '';
+let currentSegments = [];
 
 const LEVEL_COLORS = {
     A1: { bg:'#16a34a', border:'#15803d', light:'#f0fdf4', light2:'#bbf7d0' },
@@ -814,28 +816,69 @@ function extractJSON(str) {
     }
 }
 
-// ── ANALYZE TEXT (OPTIMIZED) ──
+// ── HÀM TÌM TỪ TRONG ĐOẠN VĂN GỐC VÀ TẠO SEGMENTS ──
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildParagraphSegments(text, questions) {
+    const marks = [];
+    const occupied = [];
+
+    questions.forEach((q, qi) => {
+        // Tìm từ trong văn bản, khớp ranh giới từ, không phân biệt hoa thường
+        const regex = new RegExp('(?<![\\w])' + escapeRegex(q.word) + '(?![\\w])', 'i');
+        const match = regex.exec(text);
+        if (!match) return;
+
+        // Kiểm tra không trùng vị trí với từ đã đánh dấu
+        const start = match.index, end = match.index + match[0].length;
+        const overlaps = occupied.some(r => start < r.end && end > r.start);
+        if (overlaps) return;
+
+        occupied.push({ start, end });
+        marks.push({ start, end, qi, word: q.word, definition_vi: q.definition_vi, original: match[0] });
+    });
+
+    // Sắp xếp theo vị trí xuất hiện trong văn bản
+    marks.sort((a, b) => a.start - b.start);
+
+    // Tạo mảng segments: text xen kẽ với blank
+    const segments = [];
+    let pos = 0;
+    for (const mark of marks) {
+        if (mark.start > pos) segments.push({ type: 'text', content: text.slice(pos, mark.start) });
+        segments.push({ type: 'blank', qi: mark.qi, word: mark.word, definition_vi: mark.definition_vi });
+        pos = mark.end;
+    }
+    if (pos < text.length) segments.push({ type: 'text', content: text.slice(pos) });
+
+    return segments;
+}
+
+// ── ANALYZE TEXT ──
 async function analyzeText() {
     const errDisp = document.getElementById('error-display');
     errDisp.innerHTML = '';
 
     const apiKey = document.getElementById('gemini-key').value.trim();
-    const text = document.getElementById('text-input').value.trim();
+    const text   = document.getElementById('text-input').value.trim();
 
     if (!apiKey) { showToast('⚠️ Vui lòng nhập API key!'); return; }
     if (!text || text.length < 50) { showToast('⚠️ Đoạn văn quá ngắn!'); return; }
 
+    originalText = text;   // Lưu đoạn văn gốc
     showView('loading-view');
     startLoading();
 
-    // Prompt siêu ngắn gọn vì đã có Schema định hình
-    const prompt = `Extract exactly ${selectedCount} vocabulary words at ${selectedLevel} level from this text. 
-    Requirements:
-    1. Only words found in the text.
-    2. Format the sentence with [BLANK].
-    3. Brief Vietnamese definition.
+    // Chỉ cần word + definition_vi — câu ví dụ sẽ lấy từ đoạn văn gốc
+    const prompt = `From the text below, extract exactly ${selectedCount} vocabulary words at CEFR level ${selectedLevel}.
+Requirements:
+- Only use words that actually appear in the text.
+- Return only the base/dictionary form of the word.
+- Provide a concise Vietnamese definition for each word.
 
-    Text: ${text.slice(0, 5000)}`;
+Text: ${text.slice(0, 6000)}`;
 
     try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
@@ -848,17 +891,15 @@ async function analyzeText() {
                 generationConfig: {
                     temperature: 0.1,
                     response_mime_type: "application/json",
-                    // ĐỊNH NGHĨA CẤU TRÚC DỮ LIỆU TẠI ĐÂY
                     response_schema: {
                         type: "ARRAY",
                         items: {
                             type: "OBJECT",
                             properties: {
-                                word: { type: "STRING" },
-                                sentence: { type: "STRING" },
+                                word:          { type: "STRING" },
                                 definition_vi: { type: "STRING" }
                             },
-                            required: ["word", "sentence", "definition_vi"]
+                            required: ["word", "definition_vi"]
                         }
                     }
                 }
@@ -872,7 +913,6 @@ async function analyzeText() {
 
         const data = await response.json();
         let items = [];
-        
         try {
             const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
             items = JSON.parse(rawText);
@@ -880,31 +920,34 @@ async function analyzeText() {
             throw new Error("AI trả về dữ liệu không thể đọc được.");
         }
 
-        // Kiểm tra xem mảng có rỗng không (trường hợp text không có từ phù hợp)
         if (!items || items.length === 0) {
-            throw new Error(`Không tìm thấy từ vựng nào phù hợp với trình độ ${selectedLevel} trong đoạn văn này.`);
+            throw new Error(`Không tìm thấy từ vựng nào phù hợp với trình độ ${selectedLevel}.`);
         }
 
+        // Lưu danh sách từ (không cần câu ví dụ nữa)
         currentQuestions = items
-            .filter(it => it.word && it.sentence && it.sentence.includes('[BLANK]'))
-            .map(it => ({
-                word: it.word.trim(),
-                text: it.sentence.trim(),
-                definition_vi: it.definition_vi || '',
-            }));
+            .filter(it => it.word)
+            .map(it => ({ word: it.word.trim(), definition_vi: it.definition_vi || '' }));
 
-        if (currentQuestions.length === 0) {
-            throw new Error("Dữ liệu không khớp yêu cầu (thiếu từ hoặc thiếu [BLANK]).");
+        // Xây dựng segments từ đoạn văn gốc
+        currentSegments = buildParagraphSegments(originalText, currentQuestions);
+
+        // Chỉ giữ những từ thực sự tìm được trong văn bản
+        const foundQis = new Set(currentSegments.filter(s => s.type === 'blank').map(s => s.qi));
+        allAnswers = currentQuestions
+            .filter((_, qi) => foundQis.has(qi))
+            .map(q => q.word);
+
+        if (allAnswers.length === 0) {
+            throw new Error("Không tìm thấy các từ được trích xuất trong đoạn văn gốc. Thử lại hoặc dán văn bản khác.");
         }
 
-        allAnswers = currentQuestions.map(q => q.word);
         stopLoading();
         renderExercise();
 
     } catch (err) {
         stopLoading();
         showView('setup-view');
-        // Hiển thị lỗi chi tiết hơn để debug
         errDisp.innerHTML = `<div class="error-box">⚠️ <span>${err.message}</span></div>`;
         console.error("Full Error:", err);
     }
@@ -919,7 +962,7 @@ function renderExercise() {
     const list = document.getElementById('questions-list');
     bank.innerHTML = ''; list.innerHTML = '';
 
-    // Trộn từ vựng, gắn drag & touch
+    // Word bank: trộn ngẫu nhiên, gắn drag & touch
     [...allAnswers].sort(() => Math.random() - 0.5).forEach(w => {
         const div = document.createElement('div');
         div.className = 'draggable-word';
@@ -933,43 +976,37 @@ function renderExercise() {
         bank.appendChild(div);
     });
 
-    // Tạo 1 đoạn văn liên tục
+    // Đoạn văn gốc với chỗ trống và gợi ý nghĩa tiếng Việt
     const para = document.createElement('div');
     para.className = 'paragraph-card';
 
-    currentQuestions.forEach((q, qi) => {
-        const parts = q.text.split('[BLANK]');
+    currentSegments.forEach(seg => {
+        if (seg.type === 'text') {
+            para.appendChild(document.createTextNode(seg.content));
+        } else {
+            // Chỗ trống (drop zone)
+            const zone = document.createElement('span');
+            zone.className = 'drop-zone';
+            zone.dataset.q = seg.qi;
+            zone.onclick = () => handleZoneClick(zone);
+            zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('hovered'); });
+            zone.addEventListener('dragleave', () => zone.classList.remove('hovered'));
+            zone.addEventListener('drop', e => onDropZone(e, zone));
+            para.appendChild(zone);
 
-        // Văn bản trước chỗ trống
-        para.appendChild(document.createTextNode(parts[0]));
-
-        // Chỗ trống (drop zone)
-        const zone = document.createElement('span');
-        zone.className = 'drop-zone';
-        zone.dataset.q = qi;
-        zone.onclick = () => handleZoneClick(zone);
-        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('hovered'); });
-        zone.addEventListener('dragleave', () => zone.classList.remove('hovered'));
-        zone.addEventListener('drop', e => onDropZone(e, zone));
-        para.appendChild(zone);
-
-        // Gợi ý nghĩa tiếng Việt ngay cạnh chỗ trống
-        if (q.definition_vi) {
-            const hint = document.createElement('em');
-            hint.className = 'hint-vi';
-            hint.textContent = '(' + q.definition_vi + ')';
-            para.appendChild(hint);
+            // Gợi ý nghĩa tiếng Việt ngay cạnh chỗ trống
+            if (seg.definition_vi) {
+                const hint = document.createElement('em');
+                hint.className = 'hint-vi';
+                hint.textContent = '(' + seg.definition_vi + ')';
+                para.appendChild(hint);
+            }
         }
-
-        // Văn bản sau chỗ trống + khoảng cách giữa các câu
-        const afterText = (parts[1] || '').trimEnd();
-        para.appendChild(document.createTextNode(afterText + ' '));
     });
 
     list.appendChild(para);
     updateProgress();
 }
-
 let selectedWordEl = null;
 function handleWordClick(el) {
     if (el.classList.contains('used')) return;
@@ -1011,65 +1048,68 @@ function updateProgress() {
 }
 
 function submitExercise() {
-    let correct = 0;
+    let correct = 0, total = 0;
     const resDiv = document.getElementById('detailed-results');
     resDiv.innerHTML = '';
 
-    // Thu thập kết quả
-    const results = currentQuestions.map((q, qi) => {
-        const zone = document.querySelector(`[data-q="${qi}"]`);
-        const userAns = zone ? zone.innerText.trim() : '';
-        const isOk = userAns.toLowerCase() === q.word.toLowerCase();
-        if (isOk) correct++;
-        return { q, userAns, isOk };
+    // Đọc đáp án người dùng từ các drop zones
+    const userAnswers = {};
+    document.querySelectorAll('.drop-zone').forEach(z => {
+        userAnswers[z.dataset.q] = z.innerText.trim();
     });
 
-    // Hiển thị kết quả dạng đoạn văn
+    // Hiển thị kết quả dạng đoạn văn gốc
     const para = document.createElement('div');
     para.className = 'paragraph-card';
 
-    results.forEach(({ q, userAns, isOk }) => {
-        const parts = q.text.split('[BLANK]');
-        para.appendChild(document.createTextNode(parts[0]));
-
-        if (isOk) {
-            const span = document.createElement('span');
-            span.className = 'res-word-correct';
-            span.textContent = q.word;
-            para.appendChild(span);
+    currentSegments.forEach(seg => {
+        if (seg.type === 'text') {
+            para.appendChild(document.createTextNode(seg.content));
         } else {
-            const wrong = document.createElement('span');
-            wrong.className = 'res-word-wrong';
-            wrong.textContent = userAns || '...';
-            para.appendChild(wrong);
-            const fixed = document.createElement('span');
-            fixed.className = 'res-word-fixed';
-            fixed.textContent = q.word;
-            para.appendChild(fixed);
-        }
+            total++;
+            const userAns = userAnswers[seg.qi] || '';
+            const isOk = userAns.toLowerCase() === seg.word.toLowerCase();
+            if (isOk) correct++;
 
-        if (q.definition_vi) {
-            const hint = document.createElement('em');
-            hint.className = 'hint-vi';
-            hint.textContent = '(' + q.definition_vi + ')';
-            para.appendChild(hint);
-        }
+            if (isOk) {
+                const span = document.createElement('span');
+                span.className = 'res-word-correct';
+                span.textContent = seg.word;
+                para.appendChild(span);
+            } else {
+                if (userAns) {
+                    const wrong = document.createElement('span');
+                    wrong.className = 'res-word-wrong';
+                    wrong.textContent = userAns;
+                    para.appendChild(wrong);
+                }
+                const fixed = document.createElement('span');
+                fixed.className = 'res-word-fixed';
+                fixed.textContent = seg.word;
+                para.appendChild(fixed);
+            }
 
-        const afterText = (parts[1] || '').trimEnd();
-        para.appendChild(document.createTextNode(afterText + ' '));
+            // Giữ gợi ý tiếng Việt trong kết quả
+            if (seg.definition_vi) {
+                const hint = document.createElement('em');
+                hint.className = 'hint-vi';
+                hint.textContent = '(' + seg.definition_vi + ')';
+                para.appendChild(hint);
+            }
+        }
     });
 
     resDiv.appendChild(para);
 
-    const pct = Math.round((correct / currentQuestions.length) * 100);
+    const pct = total ? Math.round((correct / total) * 100) : 0;
+    const msg = pct === 100 ? '🏆 Tuyệt vời! Hoàn hảo!' : pct >= 80 ? '🌟 Rất tốt!' : pct >= 60 ? '💪 Khá lắm!' : '📚 Cần luyện thêm!';
     document.getElementById('score-box').innerHTML = `
         <div class="score-circle"><div class="score-pct">${pct}%</div></div>
-        <div class="score-count">✅ ${correct} đúng / ${currentQuestions.length} câu</div>
-        <div class="score-msg">${pct === 100 ? '🏆 Tuyệt vời!' : pct >= 70 ? '🌟 Khá lắm!' : '💪 Cố lên nào!'}</div>`;
+        <div class="score-count">✅ ${correct} đúng / ${total} từ</div>
+        <div class="score-msg">${msg}</div>`;
 
     showView('result-view');
 }
-
 function doItAgain() {
     document.getElementById('detailed-results').innerHTML = '';
     renderExercise();
@@ -1248,7 +1288,7 @@ function downloadPDF() {
     });
     y += bRows*8+4;
 
-    // QUESTIONS
+    // FILL IN THE BLANKS — đoạn văn gốc với chỗ trống đánh số
     y += 6;
     doc.setFillColor(...PRIMARY); doc.roundedRect(M,y,cW,10,2,2,'F');
     doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
@@ -1256,33 +1296,49 @@ function downloadPDF() {
     y += 14;
 
     let pg = 1;
-    currentQuestions.forEach((q, idx) => {
-        const blanked = q.text.replace('[BLANK]', '  ____________  ');
-        const defLine = q.definition_vi ? `(${q.definition_vi})` : '';
-        doc.setFontSize(11);
-        const lines = doc.splitTextToSize(blanked, cW-16);
-        const lineH = 6.5;
-        const boxH  = Math.max(lines.length*lineH + (defLine ? 14 : 6), 16);
-
-        if (y+boxH > pageH-20) { footer(pg,2); doc.addPage(); pg++; y=20; }
-
-        if (idx%2===0) { doc.setFillColor(248,250,255); doc.roundedRect(M,y-1,cW,boxH,2,2,'F'); }
-
-        doc.setFillColor(...ACCENT); doc.roundedRect(M,y+1,8,8,1.5,1.5,'F');
-        doc.setTextColor(...PRIMARY); doc.setFont('helvetica','bold'); doc.setFontSize(8);
-        doc.text(String(idx+1), M+4, y+6.5, { align:'center' });
-
-        doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(30,30,50);
-        lines.forEach((ln,li) => doc.text(ln, M+12, y+6.5+li*lineH));
-
-        if (defLine) {
-            doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(100,130,180);
-            doc.text(defLine, M+12, y+6.5+lines.length*lineH+1.5);
+    // Xây dựng chuỗi văn bản có đánh số chỗ trống từ segments
+    let blankIdx = 0;
+    let paraText = '';
+    currentSegments.forEach(seg => {
+        if (seg.type === 'text') {
+            paraText += seg.content;
+        } else {
+            blankIdx++;
+            paraText += ` (${blankIdx})____________ `;
         }
-        doc.setDrawColor(...BORDER); doc.setLineWidth(0.25);
-        doc.line(M, y+boxH+1, M+cW, y+boxH+1);
-        y += boxH+4;
     });
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(30,30,50);
+    const paraLines = doc.splitTextToSize(paraText, cW-8);
+    const paraLineH = 7;
+    const paraH = paraLines.length * paraLineH + 10;
+
+    if (y + paraH > pageH - 20) { footer(pg, 2); doc.addPage(); pg++; y = 20; }
+    doc.setFillColor(248,250,255); doc.roundedRect(M, y-2, cW, paraH, 3, 3, 'F');
+    doc.setDrawColor(...BORDER); doc.setLineWidth(0.4); doc.roundedRect(M, y-2, cW, paraH, 3, 3, 'S');
+    paraLines.forEach((ln, li) => doc.text(ln, M+5, y + 5 + li * paraLineH));
+    y += paraH + 8;
+
+    // Bảng gợi ý nghĩa tiếng Việt cho từng số thứ tự
+    const hintSegs = currentSegments.filter(s => s.type === 'blank');
+    if (hintSegs.length) {
+        if (y + 12 > pageH - 20) { footer(pg, 2); doc.addPage(); pg++; y = 20; }
+        doc.setFillColor(...PRIMARY); doc.roundedRect(M,y,cW,9,2,2,'F');
+        doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+        doc.text('GỢI Ý NGHĨA', M+5, y+6);
+        y += 12;
+        const hCols = 2, hCW = cW / hCols;
+        hintSegs.forEach((seg, i) => {
+            const col = i % hCols, row = Math.floor(i / hCols);
+            const hx = M + col * hCW, hy = y + row * 9;
+            if (hy + 9 > pageH - 20) return;
+            doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...PRIMARY);
+            doc.text(`(${i+1})`, hx+2, hy+5);
+            doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(80,120,180);
+            doc.text(seg.definition_vi || '', hx+12, hy+5);
+        });
+        y += Math.ceil(hintSegs.length / hCols) * 9 + 6;
+    }
 
     // ANSWER KEY
     footer(pg, pg+1); doc.addPage(); pg++;
