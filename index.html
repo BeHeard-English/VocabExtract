@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Be Heard | Vocab Extract</title>
+    <title>Be Heard|Vocab Extract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&display=swap" rel="stylesheet">
-
     <style>
         :root {
             --primary: #031383;
@@ -51,7 +51,6 @@
             border: 2px solid var(--border);
         }
 
-        /* ── HEADER ── */
         .app-header {
             overflow: hidden;
             border-radius: 26px 26px 0 0;
@@ -103,7 +102,6 @@
             margin-bottom: 8px;
         }
 
-        /* ── GEMINI KEY BOX ── */
         .key-box {
             background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
             border: 2px solid #6ee7b7;
@@ -208,7 +206,6 @@
         }
         .key-hint a { color: #047857; font-weight: 800; text-decoration: underline; }
 
-        /* ── TEXTAREA ── */
         #text-input {
             width: 100%;
             min-height: 170px;
@@ -243,7 +240,6 @@
         }
         .char-count.warn { color: var(--action); }
 
-        /* ── CEFR LEVEL SELECTOR ── */
         .level-row {
             display: flex; gap: 8px;
             margin-bottom: 18px;
@@ -279,7 +275,6 @@
         .level-btn[data-level="B2"].active { background: #ea580c; border-color: #c2410c; color: #fff; box-shadow: 0 4px 0 #c2410c, 0 6px 16px rgba(234,88,12,0.3); }
         .level-btn[data-level="C1"].active { background: #be123c; border-color: #9f1239; color: #fff; box-shadow: 0 4px 0 #9f1239, 0 6px 16px rgba(190,18,60,0.3); }
 
-        /* ── COUNT SELECTOR ── */
         .count-row { display: flex; gap: 8px; margin-bottom: 22px; }
         .count-btn {
             flex: 1;
@@ -312,7 +307,6 @@
         }
         .count-btn.active small { opacity: 0.85; }
 
-        /* ── BUTTONS ── */
         .btn {
             width: 100%; padding: 15px 20px;
             border: none; border-radius: 14px;
@@ -352,7 +346,6 @@
         .divider::before, .divider::after { content: ''; flex: 1; height: 2px; background: var(--border); border-radius: 2px; }
         .divider span { font-size: 0.78rem; color: var(--text-muted); font-weight: 700; letter-spacing: 2px; }
 
-        /* ── LOADING ── */
         .loading-wrap {
             padding: 60px 28px;
             display: flex; flex-direction: column;
@@ -372,7 +365,6 @@
         .loading-msg { font-size: 1.05rem; font-weight: 800; color: var(--primary); text-align: center; }
         .loading-sub { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-align: center; }
 
-        /* ── WORD BANK ── */
         .word-bank-container {
             position: sticky; top: 0; z-index: 100;
             background: #fff;
@@ -426,14 +418,12 @@
         }
         .draggable-word.used { opacity: 0.2; pointer-events: none; }
 
-        /* ── EXERCISE ── */
         .exercise-inner { padding: 24px 24px 28px; }
         .exercise-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
         .progress-bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
         .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #4f6af5); border-radius: 99px; transition: width 0.4s ease; }
         .progress-label { font-size: 0.82rem; font-weight: 800; color: var(--text-muted); white-space: nowrap; }
 
-        /* ── PARAGRAPH CARD ── */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(14px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -449,7 +439,6 @@
             animation: fadeInUp 0.35s ease both;
             word-break: break-word;
         }
-        /* ── HINT VIETNAMESE ── */
         .hint-vi {
             font-size: 0.80rem; font-weight: 700;
             color: #0891b2;
@@ -457,7 +446,6 @@
             margin: 0 5px 0 1px;
             white-space: nowrap;
         }
-        /* ── SENTENCE CARDS (kept for result view) ── */
         .sentence-card {
             background: #f8faff;
             padding: 16px 18px 12px;
@@ -493,7 +481,6 @@
         }
         .definition-badge::before { content: '📖'; font-style: normal; font-size: 0.72rem; }
 
-        /* ── DROP ZONES ── */
         .drop-zone {
             display: inline-flex; justify-content: center; align-items: center;
             min-width: 100px; height: 36px;
@@ -512,7 +499,6 @@
         .drop-zone.hovered { background: #fff9e0; border-color: var(--accent-dark); border-style: solid; transform: scale(1.06); }
         .drop-zone:not(:empty) { background: rgba(3,19,131,0.07); border-style: solid; border-color: var(--primary); color: var(--primary); }
 
-        /* ── RESULT ── */
         .res-word-correct { color: var(--success); font-weight: 900; }
         .res-word-wrong   { color: var(--danger); text-decoration: line-through; opacity: 0.65; margin-right: 3px; }
         .res-word-fixed   { color: var(--success); font-weight: 900; border-bottom: 2px solid var(--success); padding-bottom: 1px; }
@@ -544,7 +530,6 @@
         .result-inner { padding: 24px 24px 32px; }
         .result-actions { display: flex; gap: 12px; flex-direction: column; margin-top: 24px; }
 
-        /* ── ERROR BOX ── */
         .error-box {
             background: var(--danger-bg); border: 2px solid #f1aeb5;
             border-radius: 14px; padding: 16px 20px; margin-top: 16px;
@@ -554,7 +539,6 @@
 
         .hidden { display: none !important; }
 
-        /* ── TOAST ── */
         .toast {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
             background: var(--primary); color: #fff;
@@ -588,25 +572,18 @@
         <p class="subtitle">Be Heard · Smart CEFR Vocabulary</p>
     </div>
 
-    <!-- ══ SETUP ══ -->
     <div id="setup-view" class="inner">
 
-        <!-- GEMINI KEY BOX -->
         <div class="key-box">
             <div class="key-box-header">
                 <div class="key-box-title">
-                    <div class="gemini-dot">
-                        <span></span><span></span><span></span><span></span>
-                    </div>
+                    <div class="gemini-dot"><span></span><span></span><span></span><span></span></div>
                     Google Gemini API Key
                 </div>
                 <span class="key-saved-badge" id="key-saved-badge">✓ Đã lưu</span>
             </div>
             <div class="key-input-row">
-                <input type="password" id="gemini-key"
-                    placeholder="AIza..."
-                    autocomplete="off" spellcheck="false"
-                    oninput="onKeyInput()">
+                <input type="password" id="gemini-key" placeholder="AIza..." autocomplete="off" spellcheck="false" oninput="onKeyInput()">
                 <button class="key-eye-btn" onclick="toggleKey()">👁 Hiện</button>
                 <button class="key-save-btn" onclick="saveKey()">💾 Lưu</button>
             </div>
@@ -618,9 +595,7 @@
         </div>
 
         <p class="section-label">📄 Dán đoạn văn bất kỳ</p>
-        <textarea id="text-input"
-            placeholder="Paste any English text here — an article, story, textbook paragraph... Gemini will automatically extract vocabulary at your chosen CEFR level."
-            oninput="updateCharCount()"></textarea>
+        <textarea id="text-input" placeholder="Paste any English text here — an article, story, textbook paragraph... Gemini will automatically extract vocabulary at your chosen CEFR level." oninput="updateCharCount()"></textarea>
         <p class="char-count" id="char-count">0 ký tự</p>
 
         <p class="section-label">🎯 Cấp độ CEFR cần luyện</p>
@@ -637,18 +612,15 @@
             <button class="count-btn" onclick="setCount(this,5)">5<small>nhanh</small></button>
             <button class="count-btn active" onclick="setCount(this,10)">10<small>chuẩn</small></button>
             <button class="count-btn" onclick="setCount(this,15)">15<small>đầy đủ</small></button>
-            <button class="count-btn" onclick="setCount(this,20)">20<small>thử thách</small></button>
+            <button class="count-btn" onclick="setCount(this,20)">20<small>nâng cao</small></button>
         </div>
 
         <div class="btn-row">
-            <button class="btn btn-primary" onclick="analyzeText()">
-                ✨ Trích xuất &amp; Tạo bài tập
-            </button>
+            <button class="btn btn-primary" onclick="analyzeText()">✨ Trích xuất &amp; Tạo bài tập</button>
         </div>
         <div id="error-display"></div>
     </div>
 
-    <!-- ══ LOADING ══ -->
     <div id="loading-view" class="hidden">
         <div class="loading-wrap">
             <div class="spinner-ring"></div>
@@ -657,7 +629,6 @@
         </div>
     </div>
 
-    <!-- ══ EXERCISE ══ -->
     <div id="exercise-view" class="hidden">
         <div class="word-bank-container">
             <div class="bank-header">
@@ -668,9 +639,7 @@
         </div>
         <div class="exercise-inner">
             <div class="exercise-progress">
-                <div class="progress-bar-track">
-                    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
-                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
                 <div class="progress-label" id="progress-label">0 / 0 đã điền</div>
             </div>
             <div id="questions-list"></div>
@@ -683,7 +652,6 @@
         </div>
     </div>
 
-    <!-- ══ RESULT ══ -->
     <div id="result-view" class="hidden">
         <div class="result-inner">
             <div id="score-box" class="score-banner"></div>
@@ -707,6 +675,7 @@ let currentQuestions = [];
 let allAnswers = [];
 let originalText = '';
 let currentSegments = [];
+let usedFallback = false;  // để hiển thị thông báo
 
 const LEVEL_COLORS = {
     A1: { bg:'#16a34a', border:'#15803d', light:'#f0fdf4', light2:'#bbf7d0' },
@@ -749,7 +718,6 @@ function toggleKey() {
     else { inp.type = 'password'; btn.textContent = '👁 Hiện'; }
 }
 
-// ── UI HELPERS ──
 function showView(id) {
     ['setup-view','loading-view','exercise-view','result-view'].forEach(v =>
         document.getElementById(v).classList.toggle('hidden', v !== id));
@@ -779,7 +747,6 @@ function showToast(msg) {
     setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-// ── LOADING CYCLE ──
 let loadTimer = null;
 function startLoading() {
     const steps = [
@@ -800,10 +767,8 @@ function startLoading() {
 }
 function stopLoading() { if (loadTimer) { clearInterval(loadTimer); loadTimer = null; } }
 
-// ── NÂNG CẤP: XỬ LÝ JSON AN TOÀN ──
 function extractJSON(str) {
     try {
-        // Tìm mảng JSON bắt đầu bằng [ và kết thúc bằng ]
         const start = str.indexOf('[');
         const end = str.lastIndexOf(']');
         if (start !== -1 && end !== -1) {
@@ -816,7 +781,6 @@ function extractJSON(str) {
     }
 }
 
-// ── HÀM TÌM TỪ TRONG ĐOẠN VĂN GỐC VÀ TẠO SEGMENTS ──
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -826,12 +790,10 @@ function buildParagraphSegments(text, questions) {
     const occupied = [];
 
     questions.forEach((q, qi) => {
-        // Tìm từ trong văn bản, khớp ranh giới từ, không phân biệt hoa thường
         const regex = new RegExp('(?<![\\w])' + escapeRegex(q.word) + '(?![\\w])', 'i');
         const match = regex.exec(text);
         if (!match) return;
 
-        // Kiểm tra không trùng vị trí với từ đã đánh dấu
         const start = match.index, end = match.index + match[0].length;
         const overlaps = occupied.some(r => start < r.end && end > r.start);
         if (overlaps) return;
@@ -840,10 +802,8 @@ function buildParagraphSegments(text, questions) {
         marks.push({ start, end, qi, word: q.word, definition_vi: q.definition_vi, original: match[0] });
     });
 
-    // Sắp xếp theo vị trí xuất hiện trong văn bản
     marks.sort((a, b) => a.start - b.start);
 
-    // Tạo mảng segments: text xen kẽ với blank
     const segments = [];
     let pos = 0;
     for (const mark of marks) {
@@ -856,7 +816,96 @@ function buildParagraphSegments(text, questions) {
     return segments;
 }
 
-// ── ANALYZE TEXT ──
+// Hàm gọi API Gemini với level cụ thể, trả về danh sách từ
+async function fetchWordsForLevel(level, text, neededCount, apiKey) {
+    const prompt = `From the text below, extract exactly ${neededCount} vocabulary words at CEFR level ${level}.
+Requirements:
+- Only use words that actually appear in the text.
+- Return only the base/dictionary form of the word.
+- Provide a concise Vietnamese definition for each word.
+
+Text: ${text.slice(0, 6000)}`;
+
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+                temperature: 0.1,
+                response_mime_type: "application/json",
+                response_schema: {
+                    type: "ARRAY",
+                    items: {
+                        type: "OBJECT",
+                        properties: {
+                            word:          { type: "STRING" },
+                            definition_vi: { type: "STRING" }
+                        },
+                        required: ["word", "definition_vi"]
+                    }
+                }
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Lỗi kết nối API");
+    }
+
+    const data = await response.json();
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    let items = extractJSON(rawText);
+    if (!items || !Array.isArray(items)) throw new Error("AI trả về dữ liệu không hợp lệ.");
+    return items.filter(it => it.word).map(it => ({ word: it.word.trim(), definition_vi: it.definition_vi || '' }));
+}
+
+// Hàm fallback: nếu không đủ từ, gọi thêm với level thấp hơn
+async function getWordsWithFallback(initialLevel, text, targetCount, apiKey) {
+    const levelOrder = ['A1','A2','B1','B2','C1'];
+    let currentLevel = initialLevel;
+    let collected = [];
+
+    // Hàm lấy level thấp hơn gần nhất
+    const getLowerLevel = (lvl) => {
+        const idx = levelOrder.indexOf(lvl);
+        if (idx > 0) return levelOrder[idx - 1];
+        return null;
+    };
+
+    while (collected.length < targetCount && currentLevel !== null) {
+        const needed = targetCount - collected.length;
+        try {
+            const words = await fetchWordsForLevel(currentLevel, text, needed, apiKey);
+            // Tránh trùng lặp (dựa trên từ)
+            for (const w of words) {
+                if (!collected.some(ex => ex.word.toLowerCase() === w.word.toLowerCase())) {
+                    collected.push(w);
+                }
+                if (collected.length >= targetCount) break;
+            }
+        } catch (err) {
+            console.warn(`Lỗi khi lấy từ level ${currentLevel}:`, err);
+            // nếu lỗi, vẫn tiếp tục fallback
+        }
+        // Nếu đã đủ thì dừng
+        if (collected.length >= targetCount) break;
+        // Nếu chưa đủ, chuyển xuống level thấp hơn
+        currentLevel = getLowerLevel(currentLevel);
+        if (currentLevel) usedFallback = true;
+    }
+
+    // Nếu vẫn chưa đủ, báo lỗi
+    if (collected.length < targetCount) {
+        throw new Error(`Không đủ từ vựng trong đoạn văn. Yêu cầu ${targetCount} từ, chỉ tìm được ${collected.length} từ.`);
+    }
+
+    return collected.slice(0, targetCount);
+}
+
+// ── ANALYZE TEXT (có fallback) ──
 async function analyzeText() {
     const errDisp = document.getElementById('error-display');
     errDisp.innerHTML = '';
@@ -867,72 +916,21 @@ async function analyzeText() {
     if (!apiKey) { showToast('⚠️ Vui lòng nhập API key!'); return; }
     if (!text || text.length < 50) { showToast('⚠️ Đoạn văn quá ngắn!'); return; }
 
-    originalText = text;   // Lưu đoạn văn gốc
+    originalText = text;
     showView('loading-view');
     startLoading();
-
-    // Chỉ cần word + definition_vi — câu ví dụ sẽ lấy từ đoạn văn gốc
-    const prompt = `From the text below, extract exactly ${selectedCount} vocabulary words at CEFR level ${selectedLevel}.
-Requirements:
-- Only use words that actually appear in the text.
-- Return only the base/dictionary form of the word.
-- Provide a concise Vietnamese definition for each word.
-
-Text: ${text.slice(0, 6000)}`;
+    usedFallback = false;
 
     try {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
-
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.1,
-                    response_mime_type: "application/json",
-                    response_schema: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: {
-                                word:          { type: "STRING" },
-                                definition_vi: { type: "STRING" }
-                            },
-                            required: ["word", "definition_vi"]
-                        }
-                    }
-                }
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || "Lỗi kết nối API");
-        }
-
-        const data = await response.json();
-        let items = [];
-        try {
-            const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-            items = JSON.parse(rawText);
-        } catch (e) {
-            throw new Error("AI trả về dữ liệu không thể đọc được.");
-        }
-
+        // Gọi hàm lấy từ với fallback
+        const items = await getWordsWithFallback(selectedLevel, text, selectedCount, apiKey);
         if (!items || items.length === 0) {
             throw new Error(`Không tìm thấy từ vựng nào phù hợp với trình độ ${selectedLevel}.`);
         }
 
-        // Lưu danh sách từ (không cần câu ví dụ nữa)
-        currentQuestions = items
-            .filter(it => it.word)
-            .map(it => ({ word: it.word.trim(), definition_vi: it.definition_vi || '' }));
-
+        currentQuestions = items;
         // Xây dựng segments từ đoạn văn gốc
         currentSegments = buildParagraphSegments(originalText, currentQuestions);
-
-        // Chỉ giữ những từ thực sự tìm được trong văn bản
         const foundQis = new Set(currentSegments.filter(s => s.type === 'blank').map(s => s.qi));
         allAnswers = currentQuestions
             .filter((_, qi) => foundQis.has(qi))
@@ -940,6 +938,10 @@ Text: ${text.slice(0, 6000)}`;
 
         if (allAnswers.length === 0) {
             throw new Error("Không tìm thấy các từ được trích xuất trong đoạn văn gốc. Thử lại hoặc dán văn bản khác.");
+        }
+
+        if (usedFallback) {
+            showToast(`⚠️ Không đủ từ cấp ${selectedLevel}, đã mở rộng sang cấp thấp hơn.`);
         }
 
         stopLoading();
@@ -953,16 +955,14 @@ Text: ${text.slice(0, 6000)}`;
     }
 }
 
-// ── CÁC HÀM XỬ LÝ BÀI TẬP ──
 function renderExercise() {
     showView('exercise-view');
-    document.getElementById('active-level-badge').textContent = selectedLevel;
+    document.getElementById('active-level-badge').textContent = selectedLevel + (usedFallback ? ' (mở rộng)' : '');
 
     const bank = document.getElementById('bank-content');
     const list = document.getElementById('questions-list');
     bank.innerHTML = ''; list.innerHTML = '';
 
-    // Word bank: trộn ngẫu nhiên, gắn drag & touch
     [...allAnswers].sort(() => Math.random() - 0.5).forEach(w => {
         const div = document.createElement('div');
         div.className = 'draggable-word';
@@ -976,7 +976,6 @@ function renderExercise() {
         bank.appendChild(div);
     });
 
-    // Đoạn văn gốc với chỗ trống và gợi ý nghĩa tiếng Việt
     const para = document.createElement('div');
     para.className = 'paragraph-card';
 
@@ -984,7 +983,6 @@ function renderExercise() {
         if (seg.type === 'text') {
             para.appendChild(document.createTextNode(seg.content));
         } else {
-            // Chỗ trống (drop zone)
             const zone = document.createElement('span');
             zone.className = 'drop-zone';
             zone.dataset.q = seg.qi;
@@ -993,8 +991,6 @@ function renderExercise() {
             zone.addEventListener('dragleave', () => zone.classList.remove('hovered'));
             zone.addEventListener('drop', e => onDropZone(e, zone));
             para.appendChild(zone);
-
-            // Gợi ý nghĩa tiếng Việt ngay cạnh chỗ trống
             if (seg.definition_vi) {
                 const hint = document.createElement('em');
                 hint.className = 'hint-vi';
@@ -1052,13 +1048,11 @@ function submitExercise() {
     const resDiv = document.getElementById('detailed-results');
     resDiv.innerHTML = '';
 
-    // Đọc đáp án người dùng từ các drop zones
     const userAnswers = {};
     document.querySelectorAll('.drop-zone').forEach(z => {
         userAnswers[z.dataset.q] = z.innerText.trim();
     });
 
-    // Hiển thị kết quả dạng đoạn văn gốc
     const para = document.createElement('div');
     para.className = 'paragraph-card';
 
@@ -1089,7 +1083,6 @@ function submitExercise() {
                 para.appendChild(fixed);
             }
 
-            // Giữ gợi ý tiếng Việt trong kết quả
             if (seg.definition_vi) {
                 const hint = document.createElement('em');
                 hint.className = 'hint-vi';
@@ -1116,9 +1109,7 @@ function doItAgain() {
 }
 
 // ══════════════════════════════════════
-// TOUCH DRAG — mobile / tablet
-// ══════════════════════════════════════
-// HTML5 DRAG & DROP
+// DRAG & DROP (HTML5 + Touch)
 // ══════════════════════════════════════
 let dragWord = null;
 
@@ -1133,7 +1124,6 @@ function onDropZone(e, zone) {
     e.preventDefault();
     zone.classList.remove('hovered');
     if (!dragWord) return;
-    // Trả về từ cũ trong ô (nếu có)
     if (zone.innerText.trim()) toggleBank(zone.innerText.trim(), false);
     zone.innerText = dragWord.innerText;
     toggleBank(dragWord.innerText, true);
@@ -1143,9 +1133,6 @@ function onDropZone(e, zone) {
     updateProgress();
 }
 
-// ══════════════════════════════════════
-// TOUCH DRAG — mobile / tablet
-// ══════════════════════════════════════
 let touchWord = null, touchClone = null;
 
 function onTouchStart(e) {
@@ -1192,7 +1179,6 @@ function moveClone(t) {
     touchClone.style.left = (t.clientX - (touchClone.offsetWidth || 60) / 2) + 'px';
     touchClone.style.top  = (t.clientY - (touchClone.offsetHeight || 28) / 2 - 24) + 'px';
 }
-// Proximity detection — 28px padding around each zone
 function nearestZone(touch) {
     const x = touch.clientX, y = touch.clientY, P = 28;
     let best = null, bestD = Infinity;
@@ -1206,372 +1192,174 @@ function nearestZone(touch) {
 }
 
 // ══════════════════════════════════════
-// PDF EXPORT
+// PDF EXPORT với html2canvas (giữ dấu tiếng Việt)
 // ══════════════════════════════════════
-
-// ── Chuyển tiếng Việt sang Latin để tránh lỗi font trong jsPDF ──
-function normalizeVi(str) {
-    if (!str) return '';
-    const map = {
-        'à':'a','á':'a','â':'a','ã':'a','ä':'a','å':'a',
-        'è':'e','é':'e','ê':'e','ë':'e',
-        'ì':'i','í':'i','î':'i','ï':'i',
-        'ò':'o','ó':'o','ô':'o','õ':'o','ö':'o',
-        'ù':'u','ú':'u','û':'u','ü':'u',
-        'ý':'y','ÿ':'y',
-        'À':'A','Á':'A','Â':'A','Ã':'A','Ä':'A','Å':'A',
-        'È':'E','É':'E','Ê':'E','Ë':'E',
-        'Ì':'I','Í':'I','Î':'I','Ï':'I',
-        'Ò':'O','Ó':'O','Ô':'O','Õ':'O','Ö':'O',
-        'Ù':'U','Ú':'U','Û':'U','Ü':'U',
-        'Ý':'Y',
-        // Tiếng Việt đặc biệt
-        'ắ':'a','ặ':'a','ằ':'a','ẳ':'a','ẵ':'a',
-        'ấ':'a','ậ':'a','ầ':'a','ẩ':'a','ẫ':'a',
-        'ả':'a','ạ':'a',
-        'ế':'e','ệ':'e','ề':'e','ể':'e','ễ':'e',
-        'ẻ':'e','ẹ':'e',
-        'ị':'i','ỉ':'i',
-        'ố':'o','ộ':'o','ồ':'o','ổ':'o','ỗ':'o',
-        'ớ':'o','ợ':'o','ờ':'o','ở':'o','ỡ':'o',
-        'ỏ':'o','ọ':'o',
-        'ứ':'u','ự':'u','ừ':'u','ử':'u','ữ':'u',
-        'ủ':'u','ụ':'u',
-        'ứ':'u','ự':'u',
-        'ỳ':'y','ỵ':'y','ỷ':'y','ỹ':'y',
-        'đ':'d','Đ':'D',
-        'Ắ':'A','Ặ':'A','Ằ':'A','Ẳ':'A','Ẵ':'A',
-        'Ấ':'A','Ậ':'A','Ầ':'A','Ẩ':'A','Ẫ':'A',
-        'Ả':'A','Ạ':'A',
-        'Ế':'E','Ệ':'E','Ề':'E','Ể':'E','Ễ':'E',
-        'Ẻ':'E','Ẹ':'E',
-        'Ị':'I','Ỉ':'I',
-        'Ố':'O','Ộ':'O','Ồ':'O','Ổ':'O','Ỗ':'O',
-        'Ớ':'O','Ợ':'O','Ờ':'O','Ở':'O','Ỡ':'O',
-        'Ỏ':'O','Ọ':'O',
-        'Ứ':'U','Ự':'U','Ừ':'U','Ử':'U','Ữ':'U',
-        'Ủ':'U','Ụ':'U',
-        'Ỳ':'Y','Ỵ':'Y','Ỷ':'Y','Ỹ':'Y',
-    };
-    return str.split('').map(c => map[c] || c).join('');
-}
-
-function downloadPDF() {
+async function downloadPDF() {
     if (!currentSegments.length) { showToast('⚠️ Chưa có bài tập!'); return; }
-    if (typeof window.jspdf === 'undefined') { showToast('⏳ Thư viện PDF đang tải, thử lại sau!'); return; }
-    showToast('📥 Đang tạo PDF...');
+    showToast('📥 Đang tạo PDF, vui lòng chờ...');
 
     const { jsPDF } = window.jspdf;
-    const doc   = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageW = doc.internal.pageSize.getWidth();   // 210
-    const pageH = doc.internal.pageSize.getHeight();  // 297
-    const M  = 16;          // margin trái/phải
-    const cW = pageW - M * 2;  // 178mm
-    const BOTTOM = pageH - 16; // vùng footer bắt đầu
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 12; // mm
 
-    const PRIMARY = [3, 19, 131];
-    const ACCENT  = [255, 217, 61];
-    const BORDER  = [218, 225, 245];
-    const SUCCESS = [39, 174, 96];
+    // Tạo một container tạm để chụp nội dung cần in
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '800px'; // chiều rộng phù hợp với A4
+    container.style.backgroundColor = '#fff';
+    container.style.fontFamily = "'Nunito', sans-serif";
+    container.style.padding = '20px';
+    document.body.appendChild(container);
 
-    const lc = LEVEL_COLORS[selectedLevel] || LEVEL_COLORS.B1;
-    function hexToRgb(hex) {
-        return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
-    }
-    const LEVEL_RGB = hexToRgb(lc.bg);
-
-    let pg = 1, totalPg = '?';  // tổng trang tính sau
-
-    // ── Helper: footer ──
-    function drawFooter(cur) {
-        doc.setFontSize(8); doc.setTextColor(150,150,160); doc.setFont('helvetica','normal');
-        doc.text(`Be Heard - Vocab Extract - Level ${selectedLevel}`, M, pageH - 8);
-        doc.text(`Trang ${cur}`, pageW - M, pageH - 8, { align: 'right' });
-        doc.setDrawColor(...BORDER); doc.setLineWidth(0.3);
-        doc.line(M, pageH - 12, pageW - M, pageH - 12);
-    }
-
-    // ── Helper: thêm trang mới ──
-    function newPage() {
-        drawFooter(pg);
-        doc.addPage();
-        pg++;
-        return 20; // y bắt đầu trang mới
-    }
-
-    // ── Helper: vẽ text nhiều dòng, tự xuống trang ──
-    // Trả về y mới sau khi vẽ xong
-    function drawWrappedText(text, x, startY, maxW, fontSize, fontStyle, colorRGB) {
-        doc.setFontSize(fontSize);
-        doc.setFont('helvetica', fontStyle || 'normal');
-        doc.setTextColor(...(colorRGB || [30,30,50]));
-        const lines = doc.splitTextToSize(normalizeVi(text), maxW);
-        const lineH = fontSize * 0.45;
-        let y = startY;
-        for (const ln of lines) {
-            if (y + lineH > BOTTOM) y = newPage();
-            doc.text(ln, x, y);
-            y += lineH;
+    // Hàm thêm nội dung vào container và chụp
+    async function addSection(title, contentElement) {
+        const section = document.createElement('div');
+        section.style.marginBottom = '20px';
+        section.style.pageBreakAfter = 'avoid';
+        if (title) {
+            const h2 = document.createElement('h2');
+            h2.textContent = title;
+            h2.style.backgroundColor = '#031383';
+            h2.style.color = '#fff';
+            h2.style.padding = '8px 12px';
+            h2.style.borderRadius = '8px';
+            h2.style.fontSize = '18px';
+            section.appendChild(h2);
         }
+        section.appendChild(contentElement.cloneNode(true));
+        container.appendChild(section);
+        const canvas = await html2canvas(section, { scale: 2, useCORS: false });
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = pageWidth - margin * 2;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let remainingHeight = imgHeight;
+        let y = margin;
+        // Nếu ảnh cao hơn trang, cắt thành nhiều phần
+        if (remainingHeight > pageHeight - margin * 2) {
+            let startY = 0;
+            while (startY < imgHeight) {
+                const sliceHeight = Math.min(pageHeight - margin * 2, imgHeight - startY);
+                const sliceCanvas = document.createElement('canvas');
+                sliceCanvas.width = canvas.width;
+                sliceCanvas.height = sliceHeight;
+                const ctx = sliceCanvas.getContext('2d');
+                ctx.drawImage(canvas, 0, startY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+                const sliceData = sliceCanvas.toDataURL('image/png');
+                if (startY > 0) pdf.addPage();
+                pdf.addImage(sliceData, 'PNG', margin, margin, imgWidth, sliceHeight * (imgWidth / canvas.width), undefined, 'FAST');
+                startY += sliceHeight;
+            }
+        } else {
+            pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight, undefined, 'FAST');
+        }
+        container.innerHTML = ''; // xóa để thêm phần tiếp theo
         return y;
     }
 
-    // ── Helper: đảm bảo còn đủ chỗ, nếu không thì xuống trang ──
-    function ensureSpace(y, needed) {
-        if (y + needed > BOTTOM) return newPage();
-        return y;
-    }
-
-    // ════════════════════════════════════
-    // TRANG 1 — HEADER
-    // ════════════════════════════════════
-    doc.setFillColor(...PRIMARY);
-    doc.rect(0, 0, pageW, 38, 'F');
-    doc.setFillColor(...ACCENT);
-    doc.rect(0, 38, pageW, 3.5, 'F');
-
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(22);
-    doc.text('Fill in the Gaps', pageW/2, 14, { align: 'center' });
-    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(200,210,255);
-    doc.text('Vocab Extract  -  Be Heard', pageW/2, 23, { align: 'center' });
-
-    doc.setFillColor(...LEVEL_RGB);
-    doc.roundedRect(pageW/2 - 18, 27, 36, 8, 3, 3, 'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9);
-    doc.text(`Level ${selectedLevel}`, pageW/2, 32.5, { align: 'center' });
-
-    const today = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
-    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(200,210,255);
-    doc.text(today, pageW/2, 37, { align: 'center' });
-
-    let y = 50;
-
-    // ── STUDENT INFO BOX ──
-    y = ensureSpace(y, 20);
-    doc.setFillColor(238,242,255);
-    doc.roundedRect(M, y, cW, 18, 3, 3, 'F');
-    doc.setDrawColor(...BORDER); doc.setLineWidth(0.5);
-    doc.roundedRect(M, y, cW, 18, 3, 3, 'S');
-
-    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...PRIMARY);
-    doc.text('Name:', M+5, y+8);
-    doc.setDrawColor(160,170,210); doc.setLineWidth(0.4);
-    doc.line(M+20, y+8.5, M+92, y+8.5);
-
-    doc.text('Class:', M+96, y+8);
-    doc.line(M+110, y+8.5, M+148, y+8.5);
-
-    doc.text('Score:', M+152, y+8);
-    doc.line(M+166, y+8.5, M+cW, y+8.5);
-
-    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(120,130,160);
-    doc.text('Instructions: Use the words from the Word Bank to fill in the blanks.', M+5, y+15);
-    y += 24;
-
-    // ── WORD BANK ──
-    const bWords = [...new Set(allAnswers)].sort();
-    const bCols  = 4;
-    const bCellW = cW / bCols;
-    const bRows  = Math.ceil(bWords.length / bCols);
-    const bankH  = bRows * 9 + 10;
-
-    y = ensureSpace(y, 10 + bankH);
-
-    // Header strip
-    doc.setFillColor(...PRIMARY);
-    doc.roundedRect(M, y, cW, 10, 2, 2, 'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
-    doc.text('WORD BANK', M+5, y+7);
-    y += 10;
-
-    // Body
-    doc.setFillColor(248,250,255);
-    doc.roundedRect(M, y, cW, bankH, 2, 2, 'F');
-    doc.setDrawColor(...BORDER); doc.setLineWidth(0.5);
-    doc.roundedRect(M, y, cW, bankH, 2, 2, 'S');
-    y += 6;
-
-    bWords.forEach((w, i) => {
-        const col   = i % bCols;
-        const row   = Math.floor(i / bCols);
-        const cx    = M + col * bCellW + 4;
-        const cy    = y + row * 9;
-        const chipW = bCellW - 6;
-        doc.setFillColor(255,255,255);
-        doc.setDrawColor(...BORDER); doc.setLineWidth(0.4);
-        doc.roundedRect(cx - 1, cy - 5.5, chipW, 8, 2, 2, 'FD');
-        doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...PRIMARY);
-        doc.text(w, cx + chipW/2 - 1, cy, { align: 'center' });
+    // Tạo các phần tử HTML từ state hiện tại
+    // 1. Word Bank
+    const wordBankDiv = document.createElement('div');
+    wordBankDiv.style.marginBottom = '20px';
+    const bankTitle = document.createElement('h3');
+    bankTitle.textContent = 'WORD BANK';
+    bankTitle.style.backgroundColor = '#031383';
+    bankTitle.style.color = '#fff';
+    bankTitle.style.padding = '6px 10px';
+    bankTitle.style.borderRadius = '6px';
+    bankTitle.style.fontSize = '16px';
+    wordBankDiv.appendChild(bankTitle);
+    const bankList = document.createElement('div');
+    bankList.style.display = 'flex';
+    bankList.style.flexWrap = 'wrap';
+    bankList.style.gap = '8px';
+    allAnswers.forEach(w => {
+        const chip = document.createElement('span');
+        chip.textContent = w;
+        chip.style.border = '2px solid #031383';
+        chip.style.borderRadius = '20px';
+        chip.style.padding = '4px 12px';
+        chip.style.fontWeight = 'bold';
+        chip.style.fontSize = '14px';
+        bankList.appendChild(chip);
     });
-    y += bRows * 9 + 8;
+    wordBankDiv.appendChild(bankList);
+    await addSection('', wordBankDiv);
 
-    // ── FILL IN THE BLANKS — đoạn văn gốc ──
-    y = ensureSpace(y, 14);
-    doc.setFillColor(...PRIMARY);
-    doc.roundedRect(M, y, cW, 10, 2, 2, 'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
-    doc.text('FILL IN THE BLANKS', M+5, y+7);
-    y += 14;
+    // 2. Bài tập (đoạn văn có chỗ trống)
+    const exerciseDiv = document.createElement('div');
+    exerciseDiv.style.marginBottom = '20px';
+    const exerciseTitle = document.createElement('h3');
+    exerciseTitle.textContent = 'FILL IN THE BLANKS';
+    exerciseTitle.style.backgroundColor = '#031383';
+    exerciseTitle.style.color = '#fff';
+    exerciseTitle.style.padding = '6px 10px';
+    exerciseTitle.style.borderRadius = '6px';
+    exerciseTitle.style.fontSize = '16px';
+    exerciseDiv.appendChild(exerciseTitle);
 
-    // Xây chuỗi đoạn văn có đánh số blank
-    let blankIdx = 0;
-    let paraText = '';
+    const paraClone = document.createElement('div');
+    paraClone.className = 'paragraph-card';
+    paraClone.style.border = '1px solid #dae1f5';
+    paraClone.style.padding = '16px';
+    paraClone.style.backgroundColor = '#f8faff';
+    paraClone.style.fontSize = '14px';
+    paraClone.style.lineHeight = '1.8';
     currentSegments.forEach(seg => {
         if (seg.type === 'text') {
-            paraText += seg.content;
+            paraClone.appendChild(document.createTextNode(seg.content));
         } else {
-            blankIdx++;
-            paraText += `(${blankIdx}) ____________ `;
+            const blankSpan = document.createElement('span');
+            blankSpan.textContent = ' __________ ';
+            blankSpan.style.fontWeight = 'bold';
+            blankSpan.style.color = '#FF6B6B';
+            blankSpan.style.backgroundColor = '#fff0e0';
+            blankSpan.style.padding = '2px 6px';
+            blankSpan.style.borderRadius = '4px';
+            paraClone.appendChild(blankSpan);
+            if (seg.definition_vi) {
+                const hintSpan = document.createElement('em');
+                hintSpan.textContent = ` (${seg.definition_vi})`;
+                hintSpan.style.fontSize = '12px';
+                hintSpan.style.color = '#0891b2';
+                paraClone.appendChild(hintSpan);
+            }
         }
     });
+    exerciseDiv.appendChild(paraClone);
+    await addSection('', exerciseDiv);
 
-    // Vẽ đoạn văn — font 10.5, line-height 5.5mm, tự xuống trang
-    const paraFontSize = 10.5;
-    const paraLineH    = 5.8;
-    doc.setFont('helvetica','normal'); doc.setFontSize(paraFontSize); doc.setTextColor(25,25,50);
-
-    // Padding box xung quanh đoạn văn
-    const paraLines = doc.splitTextToSize(normalizeVi(paraText), cW - 10);
-
-    // Vẽ từng dòng, mỗi lần check tràn trang
-    // Vẽ box nền cho từng "chunk" dòng trong cùng 1 trang
-    let lineStart = 0;
-    while (lineStart < paraLines.length) {
-        // Tính bao nhiêu dòng vừa trong trang này
-        const spaceAvail = BOTTOM - y - 4;
-        const linesInPage = Math.max(1, Math.floor(spaceAvail / paraLineH));
-        const chunk = paraLines.slice(lineStart, lineStart + linesInPage);
-        const chunkH = chunk.length * paraLineH + 6;
-
-        doc.setFillColor(248,250,255);
-        doc.roundedRect(M, y - 2, cW, chunkH, 2, 2, 'F');
-        doc.setDrawColor(...BORDER); doc.setLineWidth(0.3);
-        doc.roundedRect(M, y - 2, cW, chunkH, 2, 2, 'S');
-
-        doc.setFont('helvetica','normal'); doc.setFontSize(paraFontSize); doc.setTextColor(25,25,50);
-        chunk.forEach((ln, li) => {
-            doc.text(ln, M + 5, y + 4 + li * paraLineH);
-        });
-
-        y += chunkH + 4;
-        lineStart += linesInPage;
-        if (lineStart < paraLines.length) y = newPage();
-    }
-
-    y += 4;
-
-    // ── GỢI Ý NGHĨA (chỉ word — Latin; definition — normalizeVi) ──
-    const hintSegs = currentSegments.filter(s => s.type === 'blank');
-    if (hintSegs.length) {
-        y = ensureSpace(y, 14);
-        doc.setFillColor(...PRIMARY);
-        doc.roundedRect(M, y, cW, 10, 2, 2, 'F');
-        doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
-        doc.text('VOCABULARY HINTS', M+5, y+7);
-        y += 12;
-
-        const hCols  = 2;
-        const hCellW = cW / hCols;
-        const rowH   = 10;
-
-        hintSegs.forEach((seg, i) => {
-            const col = i % hCols;
-            // Khi bắt đầu hàng mới (col==0), check page break
-            if (col === 0) {
-                y = ensureSpace(y, rowH);
-                // Nền xen kẽ
-                if (Math.floor(i / hCols) % 2 === 0) {
-                    doc.setFillColor(248,250,255);
-                    doc.rect(M, y - 1, cW, rowH, 'F');
-                }
-            }
-            const hx = M + col * hCellW;
-
-            // Số thứ tự
-            doc.setFillColor(...ACCENT);
-            doc.roundedRect(hx + 1, y, 8, 7, 1.5, 1.5, 'F');
-            doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...PRIMARY);
-            doc.text(String(i + 1), hx + 5, y + 5.5, { align: 'center' });
-
-            // Từ tiếng Anh
-            doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...PRIMARY);
-            doc.text(seg.word, hx + 12, y + 5);
-
-            // Nghĩa tiếng Việt (normalize để tránh lỗi font)
-            const defText = normalizeVi(seg.definition_vi || '');
-            doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(80,110,180);
-            // Cắt nếu quá dài
-            const maxDefW = hCellW - 50;
-            const defLines = doc.splitTextToSize(defText, maxDefW);
-            doc.text(defLines[0] || '', hx + 38, y + 5);
-
-            // Xuống hàng khi cột phải xong (hoặc phần tử cuối)
-            if (col === hCols - 1 || i === hintSegs.length - 1) {
-                y += rowH;
-            }
-        });
-        y += 4;
-    }
-
-    // ════════════════════════════════════
-    // TRANG ANSWER KEY
-    // ════════════════════════════════════
-    y = newPage();
-
-    doc.setFillColor(...PRIMARY);
-    doc.rect(0, 0, pageW, 30, 'F');
-    doc.setFillColor(...LEVEL_RGB);
-    doc.rect(0, 30, pageW, 3, 'F');
-
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18);
-    doc.text('Answer Key', pageW/2, 13, { align: 'center' });
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(200,210,255);
-    doc.text('For Teacher Use Only', pageW/2, 23, { align: 'center' });
-
-    y = 42;
-    const aC  = 2;
-    const aCW = cW / aC;
-    const aRowH = 13;
-
-    const answerSegs = currentSegments.filter(s => s.type === 'blank');
-    answerSegs.forEach((seg, i) => {
-        const col = i % aC;
-        if (col === 0) {
-            y = ensureSpace(y, aRowH);
-            // Nền xen kẽ
-            if (Math.floor(i / aC) % 2 === 0) {
-                doc.setFillColor(248,250,255);
-                doc.rect(M, y - 2, cW, aRowH, 'F');
-            }
-        }
-        const ax = M + col * aCW;
-
-        // Số thứ tự
-        doc.setFillColor(...ACCENT);
-        doc.roundedRect(ax, y - 1, 8, 8, 1.5, 1.5, 'F');
-        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...PRIMARY);
-        doc.text(String(i + 1), ax + 4, y + 5, { align: 'center' });
-
-        // Từ đáp án
-        doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...SUCCESS);
-        doc.text(seg.word, ax + 12, y + 5.5);
-
-        // Nghĩa tiếng Việt
-        const defNorm = normalizeVi(seg.definition_vi || '');
-        if (defNorm) {
-            doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(130,140,180);
-            const maxDW = aCW - 28;
-            const dLines = doc.splitTextToSize(defNorm, maxDW);
-            doc.text(dLines[0], ax + 12, y + 11);
-        }
-
-        if (col === aC - 1 || i === answerSegs.length - 1) {
-            y += aRowH;
+    // 3. Answer Key (tạo dạng danh sách)
+    const answerDiv = document.createElement('div');
+    answerDiv.style.marginBottom = '20px';
+    const answerTitle = document.createElement('h3');
+    answerTitle.textContent = 'ANSWER KEY';
+    answerTitle.style.backgroundColor = '#031383';
+    answerTitle.style.color = '#fff';
+    answerTitle.style.padding = '6px 10px';
+    answerTitle.style.borderRadius = '6px';
+    answerTitle.style.fontSize = '16px';
+    answerDiv.appendChild(answerTitle);
+    const answerList = document.createElement('div');
+    answerList.style.display = 'flex';
+    answerList.style.flexDirection = 'column';
+    answerList.style.gap = '8px';
+    currentSegments.forEach((seg, idx) => {
+        if (seg.type === 'blank') {
+            const row = document.createElement('div');
+            row.innerHTML = `<strong>${idx+1}.</strong> ${seg.word} <em style="color:#0891b2">(${seg.definition_vi || ''})</em>`;
+            answerList.appendChild(row);
         }
     });
+    answerDiv.appendChild(answerList);
+    await addSection('', answerDiv);
 
-    drawFooter(pg);
-    doc.save(`vocab-extract-${selectedLevel}.pdf`);
+    // Xóa container tạm
+    document.body.removeChild(container);
+    pdf.save(`vocab-extract-${selectedLevel}.pdf`);
     showToast('✅ PDF đã tải xuống!');
 }
 </script>
