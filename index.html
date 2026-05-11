@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🏎️ Racing Quiz</title>
+<title>🏎️ Racing Quiz · Đua Xe Từ Vựng</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
@@ -569,6 +569,11 @@ let bgAudio = null, bgAudioURL = null, isMuted = false, audioCtx = null;
 const CAR_W = 54, FINISH_W = 24, PAD = 4;
 let maxPos = 300; // default, recalculated on game start
 
+// Finish-line collision window — collect all finishers within this delay
+// before declaring a winner, so simultaneous arrivals become a draw
+let gameEnded = false;
+let finishTO   = null;
+
 /* ═══════════════════════════════════════════
    SETUP
 ═══════════════════════════════════════════ */
@@ -706,6 +711,8 @@ function startGame() {
 
 function initGame() {
   gameActive = true;
+  gameEnded  = false;
+  if (finishTO) { clearTimeout(finishTO); finishTO = null; }
   for (let t=1; t<=2; t++) {
     if (T[t].revTO) clearTimeout(T[t].revTO);
     Object.assign(T[t], {score:0, pos:0, phase:'idle', currentQ:null, revTO:null});
@@ -811,10 +818,23 @@ function handleAns(team, idx) {
     setCar(team, T[team].pos);
     carAnim(team, 'zoom');
     updateProg(team);
-    // Win!
+    // Win — open a 700 ms window so a simultaneous finish by the other team
+    // is also captured and results in a draw instead of one team "winning"
     if (T[team].score >= selectedCount) {
       if (T[team].revTO) clearTimeout(T[team].revTO);
-      setTimeout(()=>endGame(team), 700);
+
+      if (finishTO) {
+        // Other team already triggered the window — both finished, it's a draw
+        clearTimeout(finishTO);
+        finishTO = null;
+        setTimeout(() => endGame(0), 700);
+      } else {
+        // First finisher — start window, give the other team a chance to join
+        finishTO = setTimeout(() => {
+          finishTO = null;
+          endGame(team); // only this team made it in time
+        }, 700);
+      }
       return;
     }
   } else {
@@ -875,8 +895,10 @@ function confirmEnd() {
    END GAME
 ═══════════════════════════════════════════ */
 function endGame(winner) {
-  if (!gameActive) return;
+  if (gameEnded) return;          // already resolved — ignore late calls
+  gameEnded  = true;
   gameActive = false;
+  if (finishTO) { clearTimeout(finishTO); finishTO = null; }
   for (let t=1; t<=2; t++) { if (T[t].revTO) clearTimeout(T[t].revTO); }
   if (bgAudio) bgAudio.pause();
 
