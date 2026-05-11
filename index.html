@@ -220,18 +220,26 @@ textarea::placeholder { color:rgba(255,255,255,0.27); }
 }
 
 /* Answer grid */
-.ans-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; flex:1; min-height:0; }
+.ans-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; flex:1; min-height:0; touch-action:manipulation; }
 .ans-btn {
   position:relative; padding:10px 8px;
   border-radius:10px; border:2px solid rgba(255,255,255,0.13);
   background:rgba(255,255,255,0.04); color:#fff;
   font-family:'Be Vietnam Pro',sans-serif;
   font-size:clamp(1.2rem,2.4vw,1.6rem); font-weight:800;
-  cursor:pointer; transition:all .15s;
+  cursor:pointer; transition:border-color .15s, background .15s, box-shadow .15s;
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
   text-align:center; gap:3px;
   line-height:1.3; word-break:break-word; overflow:hidden;
+  /* Eliminate 300ms touch delay and enable true multi-touch */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+}
+.ans-btn:active:not(:disabled) {
+  transform: scale(0.96);
+  background:rgba(255,255,255,0.14) !important;
 }
 .ans-btn:hover:not(:disabled) {
   border-color:rgba(255,255,255,0.38); background:rgba(255,255,255,0.1);
@@ -278,7 +286,7 @@ textarea::placeholder { color:rgba(255,255,255,0.27); }
   border:1px solid rgba(255,255,255,0.13); background:rgba(255,255,255,0.04);
   color:rgba(255,255,255,0.65);
   font-family:'Be Vietnam Pro',sans-serif; font-size:0.75rem; font-weight:700;
-  cursor:pointer; transition:all .2s;
+  cursor:pointer; transition:all .2s; touch-action:manipulation;
 }
 .cbtn:hover { background:rgba(255,255,255,0.11); color:#fff; }
 .race-info {
@@ -765,7 +773,12 @@ function buildAns(team, opts) {
     b.className = 'ans-btn';
     b.id = `t${team}o${i}`;
     b.innerHTML = `<span class="alabel" style="color:${col}">${lbls[i]}</span><span>${opt.text}</span><span class="kkey">[${keys[i]}]</span>`;
-    b.onclick = () => handleAns(team, i);
+
+    // pointerdown fires instantly on touch/mouse, handles true simultaneous multi-touch
+    b.addEventListener('pointerdown', (e) => {
+      e.preventDefault();           // no ghost click, no delay
+      handleAns(team, i);
+    });
     grid.appendChild(b);
   });
 }
@@ -775,10 +788,14 @@ function buildAns(team, opts) {
 ═══════════════════════════════════════════ */
 function handleAns(team, idx) {
   if (!gameActive || T[team].phase !== 'question') return;
-  T[team].phase = 'revealing';
 
-  // Lock all buttons for this team
-  document.getElementById(`t${team}-ans`).querySelectorAll('.ans-btn').forEach(b => b.disabled = true);
+  // ── Lock immediately — must happen before any async/visual work ──
+  T[team].phase = 'revealing';
+  const grid = document.getElementById(`t${team}-ans`);
+  grid.querySelectorAll('.ans-btn').forEach(b => {
+    b.disabled = true;
+    b.style.pointerEvents = 'none'; // belt-and-suspenders for touch
+  });
 
   const q = T[team].currentQ;
   const ok = q.opts[idx].correct;
